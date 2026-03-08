@@ -1,27 +1,45 @@
 {% extends "base.html" %}
+
+{% block title %}Hesap Oluştur{% endblock %}
+
 {% block content %}
+<div style="max-width: 400px; margin: 40px auto;">
+    <h2>Hesap Oluştur</h2>
 
-<h2>Kayıt Ol</h2>
+    {% if hata %}
+        <div style="background:#f8d7da; color:#842029; padding:10px; border-radius:8px; margin-bottom:15px;">
+            {{ hata }}
+        </div>
+    {% endif %}
 
-<form method="POST" style="max-width:400px;">
-    {% csrf_token %}
+    <form method="POST" action="/register/">
+        {% csrf_token %}
 
-    <div class="form-group">
-        <label>Kullanıcı Adı:</label>
-        <input type="text" name="username" required>
-    </div>
+        <div style="margin-bottom: 15px;">
+            <label>Kullanıcı Adı:</label>
+            <input type="text" name="username" required style="width:100%; padding:10px;">
+        </div>
 
-    <div class="form-group">
-        <label>Email:</label>
-        <input type="email" name="email" required>
-    </div>
+        <div style="margin-bottom: 15px;">
+            <label>E-posta:</label>
+            <input type="email" name="email" required style="width:100%; padding:10px;">
+        </div>
 
-    <div class="form-group">
-        <label>Şifre:</label>
-        <input type="password" name="password" required>
-    </div>
+        <div style="margin-bottom: 15px;">
+            <label>Şifre:</label>
+            <input type="password" name="password" required style="width:100%; padding:10px;">
+        </div>
 
-    <button type="submit" class="btn">Kayıt Ol</button>
-</form>
+        <div style="margin-bottom: 15px;">
+            <label>Şifre Tekrar:</label>
+            <input type="password" name="password2" required style="width:100%; padding:10px;">
+        </div>
 
+        <button type="submit" class="btn">Kayıt Ol</button>
+    </form>
+
+    <p style="margin-top:15px;">
+        Zaten hesabın var mı? <a href="/login/">Giriş yap</a>
+    </p>
+</div>
 {% endblock %}
