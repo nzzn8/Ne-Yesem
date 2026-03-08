@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}İletişim{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto;">
+    <h2>İletişim</h2>
+    <p>Bize mesaj göndermek için aşağıdaki formu doldur.</p>
+
+    {% if basarili %}
+        <div style="background-color:#d4edda; color:#155724; padding:12px; border-radius:8px; margin-bottom:20px;">
+            Mesajın başarıyla gönderildi.
+        </div>
+    {% endif %}
+
+    <form method="POST" action="/iletisim/">
+        {% csrf_token %}
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label for="ad">Ad Soyad</label>
+            <input type="text" id="ad" name="ad" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label for="email">E-posta</label>
+            <input type="email" id="email" name="email" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label for="mesaj">Mesaj</label>
+            <textarea id="mesaj" name="mesaj" rows="6" required style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;"></textarea>
+        </div>
+
+        <button type="submit" class="btn">Gönder</button>
+    </form>
+
+    <hr style="margin:40px 0; border:none; border-top:1px solid #ddd;">
+
+    <div style="text-align:center; margin-bottom:40px;">
+        <h3 style="margin-bottom:25px;">İletişim Ekibi</h3>
+
+        <div style="display:flex; justify-content:center; gap:60px; flex-wrap:wrap;">
+
+            <div>
+                <p><strong>Nihat Alıcı</strong></p>
+                <p>📞 <a href="tel:+905510367975" style="color:#ff6b35; text-decoration:none;">+90 551 036 79 75</a></p>
+                <p>✉️ <a href="mailto:nihataliciii@gmail.com" style="color:#ff6b35; text-decoration:none;">nihataliciii@gmail.com</a></p>
+            </div>
+
+            <div>
+                <p><strong>Ahmet Emin Kara</strong></p>
+                <p>📞 <a href="tel:+905462946079" style="color:#ff6b35; text-decoration:none;">+90 546 294 60 79</a></p>
+                <p>✉️ <a href="mailto:ahmeteminkara6@gmail.com" style="color:#ff6b35; text-decoration:none;">ahmeteminkara6@gmail.com</a></p>
+            </div>
+
+            <div>
+                <p><strong>Naz Özen</strong></p>
+                <p>📞 <a href="tel:+905468892005" style="color:#ff6b35; text-decoration:none;">+90 546 889 20 05</a></p>
+                <p>✉️ <a href="mailto:nazozen05@gmail.com" style="color:#ff6b35; text-decoration:none;">nazozen05@gmail.com</a></p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -134,14 +134,60 @@
 </head>
 <body>
 
-<nav>
-    <h1>🍳 Ne Yesem</h1>
-    <ul>
-        <li><a href="/">Ana Sayfa</a></li>
-        <li><a href="/tarifler">Tarifler</a></li>
-        <li><a href="/iletisim">İletişim</a></li>
-    </ul>
+<nav style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:#ff6b35; color:white;">
+
+    <div style="font-size:22px; font-weight:bold;">
+        Ne Yesem
+    </div>
+
+    <div style="display:flex; align-items:center; gap:25px;">
+        <a href="/" style="color:white; text-decoration:none;">Ana Sayfa</a>
+        <a href="/tarifler" style="color:white; text-decoration:none;">Tarifler</a>
+        <a href="/iletisim/" style="color:white; text-decoration:none;">İletişim</a>
+
+        <div class="dropdown" style="position:relative;">
+            <div onclick="toggleMenu()" style="cursor:pointer; font-size:22px;">
+                👤
+            </div>
+
+            <div id="profileMenu" style="
+                display:none;
+                position:absolute;
+                right:0;
+                top:35px;
+                background:white;
+                color:black;
+                border-radius:8px;
+                box-shadow:0 4px 10px rgba(0,0,0,0.2);
+                min-width:150px;
+                overflow:hidden;
+            ">
+
+                <a href="/account/" style="display:block; padding:12px; text-decoration:none; color:black;">
+                    Hesabım
+                </a>
+
+                <a href="/logout/" style="display:block; padding:12px; text-decoration:none; color:black;">
+                    Çıkış Yap
+                </a>
+
+            </div>
+        </div>
+    </div>
+
 </nav>
+
+<script>
+function toggleMenu() {
+    var menu = document.getElementById("profileMenu");
+
+    if (menu.style.display === "block") {
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "block";
+    }
+}
+</script>
 
 <div class="container">
     {% block content %}
