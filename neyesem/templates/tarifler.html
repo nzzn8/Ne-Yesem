@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Tarifler - Ne Yesem{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:30px;">
+    <h2>Popüler & Pratik Tarifler 🍲</h2>
+    <p>
+        Elinizdeki malzemelerle hazırlayabileceğiniz, mutfağımızdan pratik, popüler ve kurtarıcı tarifleri sizin için derledik. "Ne Yesem" dertlerine son!
+    </p>
+</div>
+
+<div class="card-container">
+    {% for recipe in recipes %}
+    <div class="card">
+        <h3>{{ recipe.ad }}</h3>
+        <p style="margin-bottom:6px; display:flex; align-items:center; gap:5px; font-size:14px;">
+            <strong>🕒 Süre:</strong> {{ recipe.sure }}
+        </p>
+        <p style="margin-bottom:12px; display:flex; align-items:center; gap:5px; font-size:14px;">
+            <strong>🌟 Zorluk:</strong> {{ recipe.zorluk }}
+        </p>
+        <p style="color:#555; font-size:13px; line-height:1.5;">{{ recipe.aciklama }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

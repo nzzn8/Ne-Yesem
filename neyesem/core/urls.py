@@ -10,6 +10,7 @@ urlpatterns = [
     path("account/", views.account, name="account"),
     path("logout/", views.logout_view, name="logout"),
     path("iletisim/", views.iletisim, name="iletisim"),
+    path("tarifler/", views.tarifler, name="tarifler"),
 
     path(
         "password-reset/",
