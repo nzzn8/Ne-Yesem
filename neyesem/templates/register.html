@@ -1,45 +1,53 @@
 {% extends "base.html" %}
 
-{% block title %}Hesap Oluştur{% endblock %}
+{% block title %}Kayıt Ol - Ne Yesem{% endblock %}
 
 {% block content %}
-<div style="max-width: 400px; margin: 40px auto;">
-    <h2>Hesap Oluştur</h2>
+<div style="background: white; max-width: 450px; margin: 40px auto; padding: 40px; border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid #edf2f7; text-align: center;">
+    <div style="margin-bottom: 30px;">
+        <div style="width: 60px; height: 60px; background: #fff0eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; color: var(--primary);">
+            <i class="fa-solid fa-user-plus" style="font-size: 24px;"></i>
+        </div>
+        <h2 style="font-size: 24px; font-weight: 800; color: var(--text-main);">Aramıza Katılın!</h2>
+        <p style="font-size: 14px; color: var(--text-muted); margin-top: 5px;">Milyonlarca lezzeti keşfetmek için ilk adım.</p>
+    </div>
 
     {% if hata %}
-        <div style="background:#f8d7da; color:#842029; padding:10px; border-radius:8px; margin-bottom:15px;">
-            {{ hata }}
+        <div style="background:#fef2f2; color:#ef4444; border: 1px solid #fca5a5; padding:12px; border-radius:8px; margin-bottom:20px; font-size:14px; font-weight:500;">
+            <i class="fa-solid fa-circle-exclamation" style="margin-right:5px;"></i> {{ hata }}
         </div>
     {% endif %}
 
-    <form method="POST" action="/register/">
+    <form method="POST" action="/register/" style="text-align: left;">
         {% csrf_token %}
-
         <div style="margin-bottom: 15px;">
-            <label>Kullanıcı Adı:</label>
-            <input type="text" name="username" required style="width:100%; padding:10px;">
+            <label style="display:block; margin-bottom:8px; font-size:13px; font-weight:600; color:var(--text-muted);">Kullanıcı Adı</label>
+            <input type="text" name="username" placeholder="Örn: yemekavcisi" required>
         </div>
 
         <div style="margin-bottom: 15px;">
-            <label>E-posta:</label>
-            <input type="email" name="email" required style="width:100%; padding:10px;">
+            <label style="display:block; margin-bottom:8px; font-size:13px; font-weight:600; color:var(--text-muted);">E-posta Adresi</label>
+            <input type="email" name="email" placeholder="Örn: ahmet@ornek.com" required>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Şifre:</label>
-            <input type="password" name="password" required style="width:100%; padding:10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div>
+                <label style="display:block; margin-bottom:8px; font-size:13px; font-weight:600; color:var(--text-muted);">Şifre</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <div>
+                <label style="display:block; margin-bottom:8px; font-size:13px; font-weight:600; color:var(--text-muted);">Şifre Tekrar</label>
+                <input type="password" name="password2" placeholder="••••••••" required>
+            </div>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Şifre Tekrar:</label>
-            <input type="password" name="password2" required style="width:100%; padding:10px;">
-        </div>
-
-        <button type="submit" class="btn">Kayıt Ol</button>
+        <button type="submit" class="btn" style="width: 100%; display: flex; justify-content: center; align-items: center; font-size: 15px;">Hesap Oluştur <i class="fa-solid fa-check" style="margin-left: 8px;"></i></button>
     </form>
 
-    <p style="margin-top:15px;">
-        Zaten hesabın var mı? <a href="/login/">Giriş yap</a>
-    </p>
+    <div style="margin-top:25px; border-top: 1px solid #edf2f7; padding-top: 20px;">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 0;">
+            Zaten bir hesabınız var mı? <a href="/login/" style="color: var(--primary); font-weight: 600; text-decoration: none;">Buradan Giriş Yapın</a>
+        </p>
+    </div>
 </div>
 {% endblock %}
