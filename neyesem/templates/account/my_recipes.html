@@ -1,0 +1,43 @@
+{% extends "account_base.html" %}
+
+{% block account_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f8fafc; padding-bottom: 15px; margin-bottom: 25px;">
+    <h2 style="font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0;">Benim Tariflerim</h2>
+    <span style="background:#f8fafc; color:#718096; font-weight:700; padding:6px 12px; border-radius:50px; font-size:14px;">{{ my_recipes|length }} Paylaşım</span>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: #fff8f6; padding: 20px; border-radius: 12px;">
+    <p style="color: #4a5568; font-size: 14px; margin: 0; line-height: 1.6;"><strong>Kendi gizli tariflerinizi ekleyin!</strong> Hazırladığınız enfes tarifleri platformumuza ekleyebilir ve istediğiniz zaman yönetebilirsiniz.</p>
+    <button class="btn" style="background: white; color: var(--primary); border: 2px solid var(--primary); box-shadow: none; padding: 10px 20px; flex-shrink: 0; margin-left: 20px;"><i class="fa-solid fa-plus"></i> Yeni Ekle</button>
+</div>
+
+{% if my_recipes %}
+<div class="card-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-top: 0; gap: 20px;">
+    {% for recipe in my_recipes %}
+    <div class="card" style="padding: 0; border: 1px solid #edf2f7; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        {% if recipe.image_url %}
+        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
+        {% else %}
+        <div style="height: 140px; background: #edf2f7; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">
+            <i class="fa-solid fa-image" style="font-size: 32px;"></i>
+        </div>
+        {% endif %}
+        <div class="card-content" style="padding: 15px;">
+            <h3 style="font-size: 15px; margin-bottom: 8px;">{{ recipe.title }}</h3>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: #e2e8f0; color: #4a5568; box-shadow: none;"><i class="fa-solid fa-pen"></i> Düzenle</button>
+                <button class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: #fee2e2; color: #ef4444; box-shadow: none;"><i class="fa-solid fa-trash"></i> Sil</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="text-align: center; padding: 60px 0; border: 2px dashed #cbd5e1; border-radius: 16px;">
+    <i class="fa-solid fa-bowl-food" style="font-size: 48px; margin-bottom: 20px; color: #a0aec0;"></i>
+    <p style="color: var(--text-main); font-weight: 600; font-size: 18px; margin-bottom: 5px;">Listeniz Çok Boş!</p>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">Henüz hiç tarif paylaşmamışsınız. Kendi dokunuşunuzu eklemeye ne dersiniz?</p>
+    <button class="btn"><i class="fa-solid fa-pen-to-square"></i> İlk Tarifinizi Yazın</button>
+</div>
+{% endif %}
+{% endblock %}

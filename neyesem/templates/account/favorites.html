@@ -1,0 +1,31 @@
+{% extends "account_base.html" %}
+
+{% block account_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f8fafc; padding-bottom: 15px; margin-bottom: 25px;">
+    <h2 style="font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0;">Favori Tariflerim</h2>
+    <span style="background:#fff0eb; color:var(--primary); font-weight:700; padding:6px 12px; border-radius:50px; font-size:14px;">{{ favorites|length }} Tarif</span>
+</div>
+
+{% if favorites %}
+<div class="card-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-top: 0; gap: 20px;">
+    {% for recipe in favorites %}
+    <div class="card" style="padding: 0; border: 1px solid #edf2f7; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        {% if recipe.image_url %}
+        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
+        {% endif %}
+        <div class="card-content" style="padding: 15px; display: flex; flex-direction: column;">
+            <h3 style="font-size: 15px; margin-bottom: 8px;">{{ recipe.title }}</h3>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px; flex-grow: 1;">🕒 {{ recipe.prep_time }} | 🌟 {{ recipe.difficulty }}</p>
+            <button class="btn" style="width: 100%; padding: 8px; font-size: 12px;"><i class="fa-solid fa-book-open"></i> Görüntüle</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="text-align: center; padding: 60px 0; color: var(--text-muted); background: #f8fafc; border-radius: 16px; border: 1px dashed #cbd5e1;">
+    <i class="fa-solid fa-heart-crack" style="font-size: 48px; margin-bottom: 20px; color: #a0aec0;"></i>
+    <p style="font-size: 16px; font-weight: 500;">Henüz favorilerinize eklediğiniz bir tarif yok.</p>
+    <a href="/tarifler" class="btn" style="margin-top: 20px; display: inline-block;">Hemen Tarif Keşfet</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -135,3 +135,7 @@ DEFAULT_FROM_EMAIL = "Ne Yesem <nihataliciii@gmail.com>"
 
 # Mail gönderilemediğinde hatanın ne olduğunu (Örn: Yanlış şifre, TLS hatası) terminalde net görebilmek için:
 EMAIL_FAIL_SILENTLY = False
+
+# Profil fotoğrafı vs. için Medya Yükleme Ayarları
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

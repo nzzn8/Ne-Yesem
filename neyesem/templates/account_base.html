@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Hesabım - Ne Yesem{% endblock %}
+
+{% block content %}
+<div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
+    <!-- Sidebar -->
+    <div style="width: 280px; flex-shrink: 0; background: white; border-radius: 16px; box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid #edf2f7; margin-bottom: 20px;">
+        <div style="padding: 30px 20px; text-align: center; border-bottom: 1px solid #edf2f7; background: #fafafa;">
+            {% if user.profile.avatar and user.profile.avatar.url != '/media/default_avatar.png' %}
+            <img src="{{ user.profile.avatar.url }}" alt="Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: var(--shadow-md); margin-bottom: 15px;">
+            {% else %}
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; color: #a0aec0; font-size: 36px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); border: 2px solid white;">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            {% endif %}
+            <h3 style="font-size: 18px; color: var(--text-main); font-weight: 700;">{{ user.first_name }} {{ user.last_name }}</h3>
+            <p style="font-size: 13px; color: var(--text-muted); word-break: break-all;">{{ user.email }}</p>
+        </div>
+        
+        <div style="padding: 15px;">
+            <a href="{% url 'account_profile' %}" style="display: flex; align-items: center; padding: 12px 20px; text-decoration: none; border-radius: 10px; margin-bottom: 5px; font-size: 14px; font-weight: 600; transition: 0.3s; color: {% if active_tab == 'profile' %}var(--primary){% else %}#4a5568{% endif %}; background: {% if active_tab == 'profile' %}rgba(255, 69, 0, 0.05){% else %}transparent{% endif %};">
+                <i class="fa-solid fa-user-pen" style="width: 25px;"></i> Profil Bilgileri
+            </a>
+            <a href="{% url 'account_security' %}" style="display: flex; align-items: center; padding: 12px 20px; text-decoration: none; border-radius: 10px; margin-bottom: 5px; font-size: 14px; font-weight: 600; transition: 0.3s; color: {% if active_tab == 'security' %}var(--primary){% else %}#4a5568{% endif %}; background: {% if active_tab == 'security' %}rgba(255, 69, 0, 0.05){% else %}transparent{% endif %};">
+                <i class="fa-solid fa-shield-halved" style="width: 25px;"></i> Güvenlik Ayarları
+            </a>
+            <a href="{% url 'account_favorites' %}" style="display: flex; align-items: center; padding: 12px 20px; text-decoration: none; border-radius: 10px; margin-bottom: 5px; font-size: 14px; font-weight: 600; transition: 0.3s; color: {% if active_tab == 'favorites' %}var(--primary){% else %}#4a5568{% endif %}; background: {% if active_tab == 'favorites' %}rgba(255, 69, 0, 0.05){% else %}transparent{% endif %};">
+                <i class="fa-solid fa-heart" style="width: 25px;"></i> Favori Tariflerim
+            </a>
+            <a href="{% url 'account_my_recipes' %}" style="display: flex; align-items: center; padding: 12px 20px; text-decoration: none; border-radius: 10px; margin-bottom: 5px; font-size: 14px; font-weight: 600; transition: 0.3s; color: {% if active_tab == 'my_recipes' %}var(--primary){% else %}#4a5568{% endif %}; background: {% if active_tab == 'my_recipes' %}rgba(255, 69, 0, 0.05){% else %}transparent{% endif %};">
+                <i class="fa-solid fa-book-open" style="width: 25px;"></i> Tariflerim
+            </a>
+            <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 15px 0;">
+            <a href="{% url 'logout' %}" style="display: flex; align-items: center; padding: 12px 20px; text-decoration: none; border-radius: 10px; color: #e53e3e; font-size: 14px; font-weight: 600; transition: 0.3s;">
+                <i class="fa-solid fa-arrow-right-from-bracket" style="width: 25px;"></i> Çıkış Yap
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div style="flex-grow: 1; min-width: 300px; background: white; border-radius: 16px; box-shadow: var(--shadow-sm); padding: 40px; border: 1px solid #edf2f7;">
+        {% if messages %}
+            {% for message in messages %}
+                <div style="padding: 15px 20px; background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; border-radius: 8px; margin-bottom: 25px; font-size: 14px; font-weight: 500; display: flex; align-items: center;">
+                    <i class="fa-solid fa-circle-check" style="margin-right: 10px;"></i> {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block account_content %}
+        {% endblock %}
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        .container > div {
+            flex-direction: column;
+        }
+        .container > div > div:first-child {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
