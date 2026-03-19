@@ -3,19 +3,21 @@
 {% block title %}Ana Sayfa - Ne Yesem{% endblock %}
 
 {% block content %}
-
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
-    <h2>Hoş Geldiniz 🍳</h2>
-    {% if not user.is_authenticated %}
-    <a href="/login">
-        <button class="btn">Login</button>
-    </a>
-    {% endif %}
+<div style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; padding: 100px 40px; border-radius: 24px; text-align: center; margin-bottom: 60px; box-shadow: 0 16px 40px rgba(0,0,0,0.15); position: relative; overflow: hidden;">
+    <h1 style="font-size: 52px; font-weight: 800; color: #ffffff; margin-bottom: 24px; letter-spacing: -1px; line-height: 1.2;">
+        Mutfakta Kararsızlığa Son <i class="fa-solid fa-utensils" style="color:#FF4500; margin-left:10px;"></i>
+    </h1>
+    <p style="font-size: 20px; color: #e2e8f0; max-width: 650px; margin: 0 auto 40px auto; line-height: 1.8; font-weight: 300;">
+        Elinizdeki malzemeleri seçin, saniyeler içinde size en uygun tarifleri sunalım. <strong>Ne Yesem</strong> diyorsanız, doğru yerdesiniz!
+    </p>
+    
+    <div style="display:flex; justify-content:center; gap: 20px; flex-wrap: wrap;">
+        {% if not user.is_authenticated %}
+        <a href="/login"><button class="btn" style="padding: 16px 36px; font-size: 16px;">Hemen Başla</button></a>
+        <a href="/register"><button class="btn" style="padding: 16px 36px; font-size: 16px; background: transparent; color: white; border: 2px solid white; box-shadow: none;">Ücretsiz Kayıt Ol</button></a>
+        {% else %}
+        <a href="/tarifler"><button class="btn" style="padding: 16px 36px; font-size: 16px;"><i class="fa-solid fa-magnifying-glass" style="margin-right:8px;"></i> Tarifleri Keşfet</button></a>
+        {% endif %}
+    </div>
 </div>
-
-<p>
-    Ne Yesem'e hoş geldiniz! 
-    Elinizdeki malzemelere göre en uygun tarifleri keşfetmek için giriş yapın.
-</p>
-
 {% endblock %}

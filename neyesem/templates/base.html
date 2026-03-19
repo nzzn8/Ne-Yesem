@@ -5,178 +5,260 @@
     <title>{% block title %}Ne yesem{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        :root {
+            --primary: #FF4500;
+            --primary-hover: #E63E00;
+            --bg-color: #F8FAFC;
+            --text-main: #1a202c;
+            --text-muted: #718096;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.03);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+            --shadow-lg: 0 16px 32px rgba(0,0,0,0.1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Navbar */
         nav {
-            background-color: #ff6b35;
-            padding: 15px 50px;
+            background-color: #ffffff;
+            padding: 15px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        nav h1 {
-            color: white;
-            font-size: 24px;
-        }
-
-        nav ul {
-            list-style: none;
-            display: flex;
-            gap: 20px;
-        }
-
-        nav ul li a {
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
             text-decoration: none;
-            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
             font-weight: 500;
-            transition: 0.3s;
+            font-size: 15px;
+            transition: all 0.3s ease;
         }
 
-        nav ul li a:hover {
-            opacity: 0.8;
-        }
-
-        /* Container */
-        .container {
-            width: 85%;
-            margin: 40px auto;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
+        .nav-links a:hover {
+            color: var(--primary);
         }
 
         /* Buttons */
         .btn {
-            padding: 10px 20px;
-            background-color: #ff6b35;
+            padding: 12px 28px;
+            background-color: var(--primary);
             color: white;
+            font-weight: 600;
             border: none;
-            border-radius: 6px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 4px 12px rgba(255, 69, 0, 0.3);
+            font-size: 14px;
+            letter-spacing: 0.3px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
 
         .btn:hover {
-            background-color: #e85a2a;
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 69, 0, 0.4);
+        }
+
+        /* Container */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+            min-height: 60vh;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #ffffff;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 30px;
+            margin-top: 60px;
+            border-top: 1px solid #edf2f7;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         /* Cards */
         .card-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
             margin-top: 30px;
         }
 
         .card {
             background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid rgba(0,0,0,0.02);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .card:hover .card-img {
+            transform: scale(1.08);
+        }
+
+        .card-content {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            opacity: 0;
             transition: 0.3s;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         .card h3 {
-            margin-bottom: 10px;
-            color: #ff6b35;
+            margin-bottom: 15px;
+            color: var(--text-main);
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
         }
 
         .card p {
             font-size: 14px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
         }
 
-        /* Form */
-        .form-group {
-            margin-bottom: 15px;
-        }
-
+        /* Form Elements for auth pages */
         input, select {
             width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+            transition: 0.3s;
+            background: #f8fafc;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(255,69,0,0.1);
         }
 
         @media(max-width: 768px) {
             nav {
                 flex-direction: column;
-                gap: 10px;
+                gap: 15px;
+                padding: 15px;
+            }
+            .nav-links {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
 
-<nav style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:#ff6b35; color:white;">
+<nav>
+    <a href="/" class="logo">Ne Yesem</a>
 
-    <div style="font-size:22px; font-weight:bold;">
-        Ne Yesem
-    </div>
-
-    <div style="display:flex; align-items:center; gap:25px;">
-        <a href="/" style="color:white; text-decoration:none;">Ana Sayfa</a>
-        <a href="/tarifler" style="color:white; text-decoration:none;">Tarifler</a>
-        <a href="/iletisim/" style="color:white; text-decoration:none;">İletişim</a>
+    <div class="nav-links">
+        <a href="/">Ana Sayfa</a>
+        <a href="/tarifler">Tarifler</a>
+        <a href="/iletisim/">İletişim</a>
 
         {% if user.is_authenticated %}
         <div class="dropdown" style="position:relative;">
-            <div onclick="toggleMenu()" style="cursor:pointer; font-size:22px;">
-                👤
+            <div onclick="toggleMenu()" style="cursor:pointer; display:flex; align-items:center; justify-content:center; width: 44px; height: 44px; border-radius: 50%; background: #fff0eb; border: 2px solid var(--primary); transition: 0.3s; color: var(--primary);">
+                <i class="fa-solid fa-user" style="font-size:18px;"></i>
             </div>
 
             <div id="profileMenu" style="
                 display:none;
                 position:absolute;
                 right:0;
-                top:35px;
+                top:50px;
                 background:white;
-                color:black;
-                border-radius:8px;
-                box-shadow:0 4px 10px rgba(0,0,0,0.2);
-                min-width:150px;
+                border-radius:12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                min-width:160px;
                 overflow:hidden;
+                border: 1px solid #edf2f7;
             ">
-
-                <a href="/account/" style="display:block; padding:12px; text-decoration:none; color:black;">
-                    Hesabım
-                </a>
-
-                <a href="/logout/" style="display:block; padding:12px; text-decoration:none; color:black;">
-                    Çıkış Yap
-                </a>
-
+                <a href="/account/" style="display:block; padding:12px 20px; text-decoration:none; color:#2D3436; font-size: 14px; font-weight: 500; border-bottom: 1px solid #f8fafc;">Hesabım</a>
+                <a href="/logout/" style="display:block; padding:12px 20px; text-decoration:none; color:#e53e3e; font-size: 14px; font-weight: 500;">Çıkış Yap</a>
             </div>
         </div>
+        {% else %}
+        <a href="/login"><button class="btn" style="padding: 10px 24px; font-size: 13px;">Giriş Yap</button></a>
         {% endif %}
     </div>
-
 </nav>
 
 <script>

@@ -3,24 +3,27 @@
 {% block title %}Tarifler - Ne Yesem{% endblock %}
 
 {% block content %}
-<div style="margin-bottom:30px;">
-    <h2>Popüler & Pratik Tarifler 🍲</h2>
-    <p>
-        Elinizdeki malzemelerle hazırlayabileceğiniz, mutfağımızdan pratik, popüler ve kurtarıcı tarifleri sizin için derledik. "Ne Yesem" dertlerine son!
+<div style="margin-bottom: 50px; text-align: center; padding: 20px 0;">
+    <h2 style="font-size: 38px; font-weight: 800; color: #1a202c; margin-bottom: 15px; letter-spacing: -1px;">Pratik & Lezzetli Tarifler <i class="fa-solid fa-leaf" style="color: #FF4500;"></i></h2>
+    <p style="font-size: 18px; color: #718096; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+        Mutfağımızın kurtarıcı ve en çok tercih edilen tariflerini sizin için hazırladık.
     </p>
 </div>
 
 <div class="card-container">
     {% for recipe in recipes %}
     <div class="card">
-        <h3>{{ recipe.ad }}</h3>
-        <p style="margin-bottom:6px; display:flex; align-items:center; gap:5px; font-size:14px;">
-            <strong>🕒 Süre:</strong> {{ recipe.sure }}
-        </p>
-        <p style="margin-bottom:12px; display:flex; align-items:center; gap:5px; font-size:14px;">
-            <strong>🌟 Zorluk:</strong> {{ recipe.zorluk }}
-        </p>
-        <p style="color:#555; font-size:13px; line-height:1.5;">{{ recipe.aciklama }}</p>
+        <img src="{{ recipe.resim }}" alt="{{ recipe.ad }}" class="card-img">
+        <div class="card-content">
+            <h3>{{ recipe.ad }}</h3>
+            <p>
+                <span style="display:inline-block; background:#edf2f7; padding:6px 12px; border-radius:8px; color:#4a5568; font-weight:600; margin-right:8px; font-size:12px;"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>{{ recipe.sure }}</span>
+                <span style="display:inline-block; background:rgba(255,69,0,0.1); padding:6px 12px; border-radius:8px; color:#FF4500; font-weight:600; font-size:12px;"><i class="fa-solid fa-star" style="margin-right:4px;"></i>{{ recipe.zorluk }}</span>
+            </p>
+            <p style="color:#4a5568; margin-top: 15px; flex-grow: 1; line-height:1.6;">{{ recipe.aciklama }}</p>
+            
+            <button class="btn" style="width: 100%; margin-top: 20px; padding: 12px; background: white; color: #FF4500; box-shadow: none; border: 2px solid #edf2f7; font-size: 14px;"><i class="fa-solid fa-book-open" style="margin-right:6px;"></i> Tarife Git</button>
+        </div>
     </div>
     {% endfor %}
 </div>
