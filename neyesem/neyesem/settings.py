@@ -117,5 +117,21 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "test@example.com"
+# Gerçek SMTP E-posta Gönderim Ayarları (Gmail)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Kendi Gmail adresinizi buraya yazın
+EMAIL_HOST_USER = "nihataliciii@gmail.com"  
+
+# DİKKAT: Buraya normal Gmail şifrenizi DEĞİL, Google Hesabı üzerinden oluşturduğunuz 
+# 16 haneli 'Uygulama Şifresi'ni (App Password) yazmalısınız.
+EMAIL_HOST_PASSWORD = "fzaxpseuaoxforjz" 
+
+# E-postaların kimden gittiğini gösteren isim ve adres
+DEFAULT_FROM_EMAIL = "Ne Yesem <nihataliciii@gmail.com>"
+
+# Mail gönderilemediğinde hatanın ne olduğunu (Örn: Yanlış şifre, TLS hatası) terminalde net görebilmek için:
+EMAIL_FAIL_SILENTLY = False

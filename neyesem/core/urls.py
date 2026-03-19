@@ -15,7 +15,9 @@ urlpatterns = [
     path(
         "password-reset/",
         auth_views.PasswordResetView.as_view(
-            template_name="password_reset.html"
+            template_name="password_reset.html",
+            email_template_name="password_reset_email.html",
+            extra_email_context={'domain': '127.0.0.1:8000', 'site_name': 'Ne Yesem'}
         ),
         name="password_reset",
     ),
