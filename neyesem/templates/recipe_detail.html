@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.title }} - Ne Yesem{% endblock %}
+
+{% block content %}
+<div style="background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 50px;">
+    <!-- Hero Image Area -->
+    <div style="position: relative; width: 100%; height: 400px; background: url('{{ recipe.image_url|default:'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1920&q=80' }}') center/cover no-repeat;">
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px; background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+            <h1 style="color: white; font-size: 42px; font-weight: 800; margin-bottom: 10px;">{{ recipe.title }}</h1>
+            <p style="color: #e2e8f0; font-size: 16px; max-width: 800px; line-height: 1.6;">{{ recipe.description }}</p>
+        </div>
+    </div>
+
+    <!-- Summary Stats Bar -->
+    <div style="display: flex; background: #fafafa; border-bottom: 1px solid #edf2f7; padding: 20px 40px; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
+        <div style="text-align: center; color: var(--text-main);">
+            <i class="fa-regular fa-clock" style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Süre</span>
+            <div style="font-size: 16px; font-weight: 700;">{{ recipe.prep_time }}</div>
+        </div>
+        <div style="text-align: center; color: var(--text-main);">
+            <i class="fa-solid fa-fire" style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Zorluk</span>
+            <div style="font-size: 16px; font-weight: 700;">{{ recipe.difficulty }}</div>
+        </div>
+        <div style="text-align: center; color: var(--text-main);">
+            <i class="fa-solid fa-users" style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Porsiyon</span>
+            <div style="font-size: 16px; font-weight: 700;">{{ recipe.servings|default:'Belirtilmemiş' }}</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div style="padding: 40px; display: grid; grid-template-columns: 1fr 2fr; gap: 40px;">
+        
+        <!-- Ingredients Sidebar -->
+        <div style="background: #fff8f6; padding: 30px; border-radius: 16px; align-self: start; border: 1px solid #ffedd5;">
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: center;">
+                <i class="fa-solid fa-basket-shopping" style="color: var(--primary); margin-right: 10px;"></i> Malzemeler
+            </h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for ingredient in recipe.ingredients.splitlines %}
+                    {% if ingredient.strip %}
+                    <li style="padding: 10px 0; border-bottom: 1px dashed #fdba74; font-size: 15px; color: #4a5568; display: flex; align-items: start;">
+                        <i class="fa-solid fa-check" style="color: var(--primary); margin-right: 10px; margin-top: 4px; font-size: 12px;"></i>
+                        {{ ingredient }}
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Instructions Section -->
+        <div>
+            <h3 style="font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom: 25px; display: flex; align-items: center;">
+                <i class="fa-solid fa-list-check" style="color: var(--primary); margin-right: 10px;"></i> Adım Adım Hazırlanışı
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                {% for instruction in recipe.instructions.splitlines %}
+                    {% if instruction.strip %}
+                    <div style="display: flex; align-items: flex-start; background: #fafafa; padding: 20px; border-radius: 12px; border: 1px solid #edf2f7;">
+                        <div style="flex-shrink: 0; margin-right: 15px; color: var(--primary); margin-top: 4px;">
+                            <i class="fa-solid fa-circle-right" style="font-size: 18px;"></i>
+                        </div>
+                        <div style="flex-grow: 1; font-size: 16px; color: #4a5568; line-height: 1.7;">
+                            {{ instruction }}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        div[style*="grid-template-columns: 1fr 2fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

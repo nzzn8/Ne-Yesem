@@ -13,16 +13,22 @@
 <div class="card-container">
     {% for recipe in recipes %}
     <div class="card">
-        <img src="{{ recipe.resim }}" alt="{{ recipe.ad }}" class="card-img">
+        {% if recipe.image_url %}
+        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="height: 200px; object-fit: cover;">
+        {% else %}
+        <div style="height: 200px; background: #edf2f7; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">
+            <i class="fa-solid fa-image" style="font-size: 32px;"></i>
+        </div>
+        {% endif %}
         <div class="card-content">
-            <h3>{{ recipe.ad }}</h3>
+            <h3>{{ recipe.title }}</h3>
             <p>
-                <span style="display:inline-block; background:#edf2f7; padding:6px 12px; border-radius:8px; color:#4a5568; font-weight:600; margin-right:8px; font-size:12px;"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>{{ recipe.sure }}</span>
-                <span style="display:inline-block; background:rgba(255,69,0,0.1); padding:6px 12px; border-radius:8px; color:#FF4500; font-weight:600; font-size:12px;"><i class="fa-solid fa-star" style="margin-right:4px;"></i>{{ recipe.zorluk }}</span>
+                <span style="display:inline-block; background:#edf2f7; padding:6px 12px; border-radius:8px; color:#4a5568; font-weight:600; margin-right:8px; font-size:12px;"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>{{ recipe.prep_time }}</span>
+                <span style="display:inline-block; background:rgba(255,69,0,0.1); padding:6px 12px; border-radius:8px; color:#FF4500; font-weight:600; font-size:12px;"><i class="fa-solid fa-star" style="margin-right:4px;"></i>{{ recipe.difficulty }}</span>
             </p>
-            <p style="color:#4a5568; margin-top: 15px; flex-grow: 1; line-height:1.6;">{{ recipe.aciklama }}</p>
+            <p style="color:#4a5568; margin-top: 15px; flex-grow: 1; line-height:1.6;">{{ recipe.description|truncatewords:15 }}</p>
             
-            <button class="btn" style="width: 100%; margin-top: 20px; padding: 12px; background: white; color: #FF4500; box-shadow: none; border: 2px solid #edf2f7; font-size: 14px;"><i class="fa-solid fa-book-open" style="margin-right:6px;"></i> Tarife Git</button>
+            <a href="{% url 'recipe_detail' recipe.id %}" class="btn" style="display: block; text-align: center; width: 100%; margin-top: 20px; padding: 12px; background: white; color: #FF4500; box-shadow: none; border: 2px solid #edf2f7; font-size: 14px; text-decoration: none;"><i class="fa-solid fa-book-open" style="margin-right:6px;"></i> Tarife Git</a>
         </div>
     </div>
     {% endfor %}

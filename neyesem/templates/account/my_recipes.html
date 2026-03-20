@@ -25,8 +25,9 @@
         <div class="card-content" style="padding: 15px;">
             <h3 style="font-size: 15px; margin-bottom: 8px;">{{ recipe.title }}</h3>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: #e2e8f0; color: #4a5568; box-shadow: none;"><i class="fa-solid fa-pen"></i> Düzenle</button>
-                <button class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: #fee2e2; color: #ef4444; box-shadow: none;"><i class="fa-solid fa-trash"></i> Sil</button>
+                <a href="{% url 'recipe_detail' recipe.id %}" class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: var(--primary); color: white; box-shadow: none; text-decoration: none; text-align: center;" title="Görüntüle"><i class="fa-solid fa-eye"></i></a>
+                <button class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: #e2e8f0; color: #4a5568; box-shadow: none;" title="Düzenle"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: #fee2e2; color: #ef4444; box-shadow: none;" title="Sil"><i class="fa-solid fa-trash"></i></button>
             </div>
         </div>
     </div>

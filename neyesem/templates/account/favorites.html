@@ -16,7 +16,7 @@
         <div class="card-content" style="padding: 15px; display: flex; flex-direction: column;">
             <h3 style="font-size: 15px; margin-bottom: 8px;">{{ recipe.title }}</h3>
             <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px; flex-grow: 1;">🕒 {{ recipe.prep_time }} | 🌟 {{ recipe.difficulty }}</p>
-            <button class="btn" style="width: 100%; padding: 8px; font-size: 12px;"><i class="fa-solid fa-book-open"></i> Görüntüle</button>
+            <a href="{% url 'recipe_detail' recipe.id %}" class="btn" style="display: block; text-align: center; width: 100%; padding: 8px; font-size: 12px; text-decoration: none; box-sizing: border-box;"><i class="fa-solid fa-book-open"></i> Görüntüle</a>
         </div>
     </div>
     {% endfor %}
