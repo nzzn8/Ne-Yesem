@@ -1,4 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -122,7 +125,23 @@ def logout_view(request):
 
 def tarifler(request):
     recipes = Recipe.objects.all().order_by('-created_at')
-    return render(request, "tarifler.html", {"recipes": recipes})
+    user_favorites = []
+    if request.user.is_authenticated:
+        user_favorites = list(request.user.profile.favorites.values_list('id', flat=True))
+    return render(request, "tarifler.html", {"recipes": recipes, "user_favorites": user_favorites})
+
+@login_required
+@require_POST
+def toggle_favorite(request, recipe_id):
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    profile = request.user.profile
+    if recipe in profile.favorites.all():
+        profile.favorites.remove(recipe)
+        is_favorited = False
+    else:
+        profile.favorites.add(recipe)
+        is_favorited = True
+    return JsonResponse({'is_favorited': is_favorited})
 
 class RecipeDetailView(DetailView):
     model = Recipe

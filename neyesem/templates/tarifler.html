@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Tarifler - Ne Yesem{% endblock %}
 
@@ -12,11 +13,18 @@
 
 <div class="card-container">
     {% for recipe in recipes %}
-    <div class="card">
+    <div class="card recipe-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; position: relative;">
+        <!-- Favorite Heart Icon -->
+        {% if user.is_authenticated %}
+        <button class="favorite-btn" data-id="{{ recipe.id }}" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s ease; z-index: 10;">
+            <i class="{% if recipe.id in user_favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart fav-icon" style="color: {% if recipe.id in user_favorites %}#e53e3e{% else %}#718096{% endif %}; font-size: 20px; transition: color 0.3s ease;"></i>
+        </button>
+        {% endif %}
+
         {% if recipe.image_url %}
-        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="height: 200px; object-fit: cover;">
+        <img src="{% static recipe.image_url %}" alt="{{ recipe.title }}" class="card-img" style="aspect-ratio: 16/9; width: 100%; object-fit: cover; display: block;">
         {% else %}
-        <div style="height: 200px; background: #edf2f7; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">
+        <div style="aspect-ratio: 16/9; width: 100%; background: #edf2f7; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">
             <i class="fa-solid fa-image" style="font-size: 32px;"></i>
         </div>
         {% endif %}
@@ -33,4 +41,42 @@
     </div>
     {% endfor %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const favButtons = document.querySelectorAll('.favorite-btn');
+    
+    favButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const recipeId = this.dataset.id;
+            const icon = this.querySelector('.fav-icon');
+            
+            fetch(`/tarif/${recipeId}/toggle-favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) return response.json();
+                throw new Error('Network response was not ok.');
+            })
+            .then(data => {
+                if (data.is_favorited) {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                    icon.style.color = '#e53e3e'; // red fill
+                } else {
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                    icon.style.color = '#718096'; // gray outline
+                }
+            })
+            .catch(error => console.error('Error toggling favorite:', error));
+        });
+    });
+});
+</script>
 {% endblock %}
