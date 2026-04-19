@@ -32,9 +32,13 @@
 
         <!-- Favorite Heart Icon -->
         {% if user.is_authenticated %}
-        <button class="favorite-btn" data-id="{{ recipe.id }}" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s ease; z-index: 10;">
+        <button class="favorite-btn" data-id="{{ recipe.id }}" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s ease; z-index: 10;">
             <i class="{% if recipe.id in user_favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart fav-icon" style="color: {% if recipe.id in user_favorites %}#e53e3e{% else %}#718096{% endif %}; font-size: 20px; transition: color 0.3s ease;"></i>
         </button>
+        {% else %}
+        <a href="{% url 'login' %}?next={% url 'tarifler' %}" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s ease; z-index: 10; text-decoration: none;">
+            <i class="fa-regular fa-heart" style="color: #718096; font-size: 20px; transition: color 0.3s ease;"></i>
+        </a>
         {% endif %}
 
         {% if recipe.image_url %}

@@ -234,6 +234,9 @@
     <div class="nav-links">
         <a href="/">Ana Sayfa</a>
         <a href="/tarifler">Tarifler</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'account_favorites' %}">Favori Tariflerim</a>
+        {% endif %}
         <a href="/iletisim/">İletişim</a>
 
         {% if user.is_authenticated %}

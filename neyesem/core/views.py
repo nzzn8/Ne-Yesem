@@ -171,6 +171,14 @@ class RecipeDetailView(DetailView):
     template_name = 'recipe_detail.html'
     context_object_name = 'recipe'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        is_favorited = False
+        if self.request.user.is_authenticated:
+            is_favorited = self.object in self.request.user.profile.favorites.all()
+        context['is_favorited'] = is_favorited
+        return context
+
 def iletisim(request):
     basarili = False
 
