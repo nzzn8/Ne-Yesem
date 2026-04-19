@@ -12,20 +12,30 @@ def parse_advanced(line):
     if line.startswith('-') or line.startswith('*'):
          line = line[1:].strip()
          
-    # 1. Virgül, "ve", "ile", " / " bağlaçlarından böl
-    # Sadece etrafında boşluk olan " / " işaretinden böl ki "1/2" gibi kesirler bozulmasın
+    # Özel durumlar: "tavuk veya sebze suyu" gibi birleştirmeler
+    line = line.lower()
+    line = line.replace("tavuk veya sebze suyu", "tavuk suyu")
+    line = line.replace("tavuk/sebze suyu", "tavuk suyu")
+    
+    # "Sos için:", "Üzeri için:" gibi başlıkları sil
+    line = re.sub(r'(sos|üzeri|servis|içi)\s+için:?', '', line)
+    
+    # 1. Virgül, "ve", "ile", " / " bağlaçlarından ayır
     parts_raw = re.split(r',|\s+ve\s+|\s+ile\s+|\s+/\s+', line)
     
     results = []
     
+    # 2. Temizlenecek olan sıfatlar ve gereksiz betimleyiciler
     adjectives = [
         "orta boy", "küçük boy", "büyük boy", "ince doğranmış", 
         "yemeklik doğranmış", "rendelenmiş", "ezilmiş", "haşlanmış", 
         "doğranmış", "kıyılmış", "süzülmüş", "eritilmiş", "oda sıcaklığında",
         "ayıklanmış", "kabuğu soyulmuş", "dilimlenmiş", "iri kıyım", "taze çekilmiş",
-        "sıcak", "soğuk", "ılık", "kavrulmuş", "çekilmiş", "dövülmüş"
+        "sıcak", "soğuk", "ılık", "kavrulmuş", "çekilmiş", "dövülmüş",
+        "istenirse", "isteğe bağlı", "arzuya göre", "tercihen"
     ]
     
+    # 3. Miktar birimleri
     unit_keywords = [
         "gram", "gr", "kg", "kilogram", "diş", "demet", "adet", "paket", 
         "tatlı", "yemek", "çay", "su", "bardak", "bardağı", "kaşık", "kaşığı", 
@@ -43,7 +53,7 @@ def parse_advanced(line):
         
         parsing_qty = True
         
-        # Miktar ve birimleri isimden ayır
+        # İlk Geçiş: Miktar ve birimleri malzemenin saf isminden ayır
         for w in words:
             lower_w = w.lower()
             has_digit = any(char.isdigit() for char in w)
@@ -62,7 +72,7 @@ def parse_advanced(line):
             name_text = qty_text
             qty_text = ""
             
-        # Sıfatları temizle
+        # İkinci Geçiş: Kalan malzeme ismi içindeki sıfatları regex ile temizle
         lower_name = name_text.lower()
         for adj in adjectives:
             if adj in lower_name:
@@ -71,13 +81,15 @@ def parse_advanced(line):
                 lower_name = name_text.lower()
                 
         name_text = name_text.strip()
-        name_text = re.sub(r'\s+', ' ', name_text) # Fazla boşlukları temizle
+        name_text = re.sub(r'\s+', ' ', name_text) # Çift boşlukları tek boşluğa indir
         
         if name_text:
-            # Baş harflerini büyüt
+            # Baş harflerini büyüt (Eğer parantez vb kaldıysa onları da silebiliriz ama kalsın)
+            name_text = name_text.replace("(", "").replace(")", "")
             results.append((qty_text, name_text.title()))
             
     return results
+
 
 if __name__ == "__main__":
     print("Mevcut malzemeler temizleniyor...")
