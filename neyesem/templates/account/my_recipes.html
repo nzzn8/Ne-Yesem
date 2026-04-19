@@ -14,7 +14,7 @@
 {% if my_recipes %}
 <div class="card-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-top: 0; gap: 20px;">
     {% for recipe in my_recipes %}
-    <div class="card" style="padding: 0; border: 1px solid #edf2f7; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+    <div class="card" onclick="window.location.href='{% url \'recipe_detail\' recipe.id %}'" role="link" tabindex="0" style="padding: 0; border: 1px solid #edf2f7; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
         {% if recipe.image_url %}
         <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
         {% else %}
@@ -25,9 +25,9 @@
         <div class="card-content" style="padding: 15px;">
             <h3 style="font-size: 15px; margin-bottom: 8px;">{{ recipe.title }}</h3>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <a href="{% url 'recipe_detail' recipe.id %}" class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: var(--primary); color: white; box-shadow: none; text-decoration: none; text-align: center;" title="Görüntüle"><i class="fa-solid fa-eye"></i></a>
-                <button class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: #e2e8f0; color: #4a5568; box-shadow: none;" title="Düzenle"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: #fee2e2; color: #ef4444; box-shadow: none;" title="Sil"><i class="fa-solid fa-trash"></i></button>
+                <span class="btn" style="flex: 1; padding: 8px; font-size: 12px; background: var(--primary); color: white; box-shadow: none; text-decoration: none; text-align: center;" title="Görüntüle"><i class="fa-solid fa-eye"></i></span>
+                <button class="btn" onclick="event.stopPropagation();" style="flex: 1; padding: 8px; font-size: 12px; background: #e2e8f0; color: #4a5568; box-shadow: none;" title="Düzenle"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn" onclick="event.stopPropagation();" style="flex: 1; padding: 8px; font-size: 12px; background: #fee2e2; color: #ef4444; box-shadow: none;" title="Sil"><i class="fa-solid fa-trash"></i></button>
             </div>
         </div>
     </div>
