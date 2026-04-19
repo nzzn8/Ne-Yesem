@@ -1,5 +1,5 @@
 {% extends "account_base.html" %}
-
+{% load static %}
 {% block account_content %}
 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f8fafc; padding-bottom: 15px; margin-bottom: 25px;">
     <h2 style="font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0;">Benim Tariflerim</h2>
@@ -14,13 +14,15 @@
 {% if my_recipes %}
 <div class="card-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-top: 0; gap: 20px;">
     {% for recipe in my_recipes %}
-    <div class="card" onclick="window.location.href='{% url \'recipe_detail\' recipe.id %}'" role="link" tabindex="0" style="padding: 0; border: 1px solid #edf2f7; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+    <div class="card" onclick="window.location.href='{% url 'recipe_detail' recipe.id %}'" role="link" tabindex="0" style="padding: 0; border: 1px solid #edf2f7; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
         {% if recipe.image_url %}
-        <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
+            {% if "http" in recipe.image_url %}
+            <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
+            {% else %}
+            <img src="{% static recipe.image_url %}" alt="{{ recipe.title }}" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
+            {% endif %}
         {% else %}
-        <div style="height: 140px; background: #edf2f7; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">
-            <i class="fa-solid fa-image" style="font-size: 32px;"></i>
-        </div>
+        <img src="https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=800&q=80" alt="Tarif Görseli Yok" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
         {% endif %}
         <div class="card-content" style="padding: 15px;">
             <h3 style="font-size: 15px; margin-bottom: 8px;">{{ recipe.title }}</h3>
