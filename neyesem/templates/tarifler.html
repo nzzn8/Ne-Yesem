@@ -14,6 +14,9 @@
 <div class="card-container">
     {% for recipe in recipes %}
     <div class="card recipe-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; position: relative;">
+        <!-- Tüm kartı tıklanabilir yapan görünmez link (Stretched Link yöntemi) -->
+        <a href="{% url 'recipe_detail' recipe.id %}" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 1;" aria-label="{{ recipe.title }} detaylarına git"></a>
+
         <!-- Favorite Heart Icon -->
         {% if user.is_authenticated %}
         <button class="favorite-btn" data-id="{{ recipe.id }}" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s ease; z-index: 10;">
@@ -35,8 +38,6 @@
                 <span style="display:inline-block; background:rgba(255,69,0,0.1); padding:6px 12px; border-radius:8px; color:#FF4500; font-weight:600; font-size:12px;"><i class="fa-solid fa-star" style="margin-right:4px;"></i>{{ recipe.difficulty }}</span>
             </p>
             <p style="color:#4a5568; margin-top: 15px; flex-grow: 1; line-height:1.6;">{{ recipe.description|truncatewords:15 }}</p>
-            
-            <a href="{% url 'recipe_detail' recipe.id %}" class="btn" style="display: block; text-align: center; width: 100%; margin-top: 20px; padding: 12px; background: white; color: #FF4500; box-shadow: none; border: 2px solid #edf2f7; font-size: 14px; text-decoration: none;"><i class="fa-solid fa-book-open" style="margin-right:6px;"></i> Tarife Git</a>
         </div>
     </div>
     {% endfor %}
