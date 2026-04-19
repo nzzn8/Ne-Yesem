@@ -11,6 +11,19 @@
     </p>
 </div>
 
+<div style="max-width: 600px; margin: 0 auto 40px auto; text-align: center;">
+    <form method="GET" action="{% url 'tarifler' %}" style="display: flex; gap: 10px;">
+        <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Tarif veya malzeme ara (örn: mantar, tavuk)..." style="flex: 1; padding: 15px 20px; border-radius: 50px; border: 2px solid #edf2f7; font-size: 16px; outline: none; transition: border-color 0.3s; background: white;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#edf2f7'">
+        <button type="submit" class="btn" style="padding: 15px 30px; font-size: 16px; border-radius: 50px;"><i class="fa-solid fa-magnifying-glass" style="margin-right: 8px;"></i> Ara</button>
+    </form>
+    {% if selected_ingredient %}
+        <div style="margin-top: 20px; display: inline-block; background: #fff0eb; padding: 10px 20px; border-radius: 50px; color: var(--primary); font-weight: 600; font-size: 15px; border: 1px solid #ffedd5;">
+            Filtre: <span style="color: #1a202c;">{{ selected_ingredient }}</span>
+            <a href="{% url 'tarifler' %}" style="margin-left: 12px; color: #e53e3e; text-decoration: none; padding: 2px 6px; border-radius: 50%; hover: background: rgba(229,62,62,0.1);"><i class="fa-solid fa-xmark"></i></a>
+        </div>
+    {% endif %}
+</div>
+
 <div class="card-container">
     {% for recipe in recipes %}
     <div class="card recipe-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; position: relative;">

@@ -39,14 +39,17 @@
             <h3 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: center;">
                 <i class="fa-solid fa-basket-shopping" style="color: var(--primary); margin-right: 10px;"></i> Malzemeler
             </h3>
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                {% for ingredient in recipe.ingredients.splitlines %}
-                    {% if ingredient.strip %}
-                    <li style="padding: 10px 0; border-bottom: 1px dashed #fdba74; font-size: 15px; color: #4a5568; display: flex; align-items: start;">
-                        <i class="fa-solid fa-check" style="color: var(--primary); margin-right: 10px; margin-top: 4px; font-size: 12px;"></i>
-                        {{ ingredient }}
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for ri in recipe.recipe_ingredients.all %}
+                    <li>
+                        <a href="{% url 'ingredient_filter' ri.ingredient.name %}" style="display: inline-block; padding: 8px 16px; background: white; border: 1px solid var(--primary); color: var(--primary); border-radius: 50px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(255,69,0,0.1);" onmouseover="this.style.background='var(--primary)'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='var(--primary)';">
+                            <i class="fa-solid fa-leaf" style="margin-right: 6px;"></i>
+                            {% if ri.quantity_text %}<span style="color: #4a5568; font-weight: 500; margin-right: 4px;">{{ ri.quantity_text }}</span>{% endif %}
+                            {{ ri.ingredient.name }}
+                        </a>
                     </li>
-                    {% endif %}
+                {% empty %}
+                    <p style="color: #a0aec0; font-size: 14px;">Henüz malzeme eklenmemiş.</p>
                 {% endfor %}
             </ul>
         </div>

@@ -14,6 +14,7 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("iletisim/", views.iletisim, name="iletisim"),
     path("tarifler/", views.tarifler, name="tarifler"),
+    path("malzeme/<str:ingredient_name>/", views.tarifler, name="ingredient_filter"),
     path("tarif/<int:pk>/", views.RecipeDetailView.as_view(), name="recipe_detail"),
     path("tarif/<int:recipe_id>/toggle-favorite/", views.toggle_favorite, name="toggle_favorite"),
 

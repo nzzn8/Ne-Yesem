@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import models
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
@@ -123,12 +124,34 @@ def logout_view(request):
     logout(request)
     return redirect("/")
 
-def tarifler(request):
+def tarifler(request, ingredient_name=None):
     recipes = Recipe.objects.all().order_by('-created_at')
+    
+    query = request.GET.get('q')
+    if query:
+        # Virgülle ayrılmış çoklu malzeme veya tek arama için (örn: "tavuk, mantar")
+        query_parts = [part.strip() for part in query.split(',') if part.strip()]
+        
+        for part in query_parts:
+            recipes = recipes.filter(
+                models.Q(title__icontains=part) | 
+                models.Q(recipe_ingredients__ingredient__name__icontains=part)
+            )
+        recipes = recipes.distinct()
+
+    if ingredient_name:
+        recipes = recipes.filter(recipe_ingredients__ingredient__name__iexact=ingredient_name)
+
     user_favorites = []
     if request.user.is_authenticated:
         user_favorites = list(request.user.profile.favorites.values_list('id', flat=True))
-    return render(request, "tarifler.html", {"recipes": recipes, "user_favorites": user_favorites})
+        
+    return render(request, "tarifler.html", {
+        "recipes": recipes, 
+        "user_favorites": user_favorites,
+        "search_query": query,
+        "selected_ingredient": ingredient_name
+    })
 
 @login_required
 @require_POST

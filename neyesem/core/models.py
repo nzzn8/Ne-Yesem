@@ -3,12 +3,33 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+class Ingredient(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Malzeme Adı")
+
+    def __str__(self):
+        return self.name
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='recipe_ingredients')
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name='recipe_ingredients')
+    quantity_text = models.CharField(max_length=100, verbose_name="Miktar/Birim", blank=True, null=True, help_text="Örn: 2 diş, 500 gram, 1 yemek kaşığı")
+
+    class Meta:
+        verbose_name = "Tarif Malzemesi"
+        verbose_name_plural = "Tarif Malzemeleri"
+
+    def __str__(self):
+        if self.quantity_text:
+            return f"{self.quantity_text} {self.ingredient.name}"
+        return self.ingredient.name
+
 class Recipe(models.Model):
     title = models.CharField(max_length=200, verbose_name="Tarif Adı")
     prep_time = models.CharField(max_length=50, verbose_name="Hazırlanma Süresi")
     difficulty = models.CharField(max_length=50, verbose_name="Zorluk Derecesi")
     description = models.TextField(verbose_name="Kısa Açıklama")
-    ingredients = models.TextField(verbose_name="Malzemeler", help_text="Her bir malzemeyi yeni bir satıra yazın.", blank=True, null=True)
+    ingredients = models.TextField(verbose_name="Eski Malzemeler (Metin)", help_text="Sadece eski verileri tutmak için.", blank=True, null=True)
+    ingredient_list = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name="recipes", blank=True, verbose_name="Malzemeler")
     instructions = models.TextField(verbose_name="Hazırlanışı", help_text="Adımları sırasıyla alt alta yazın.", blank=True, null=True)
     servings = models.CharField(max_length=50, verbose_name="Kaç Kişilik", blank=True, null=True)
     image_url = models.URLField(blank=True, null=True, verbose_name="Resim URL")
