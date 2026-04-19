@@ -10,7 +10,9 @@
 <div class="card-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-top: 0; gap: 20px;">
     {% for recipe in favorites %}
     <a href="{% url 'recipe_detail' recipe.id %}" class="card" style="padding: 0; border: 1px solid #edf2f7; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-        {% if recipe.image_url %}
+        {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
+        {% elif recipe.image_url %}
             {% if "http" in recipe.image_url %}
             <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="height: 140px; width: 100%; object-fit: cover;">
             {% else %}

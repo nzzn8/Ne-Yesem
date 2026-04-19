@@ -32,6 +32,7 @@ class Recipe(models.Model):
     ingredient_list = models.ManyToManyField(Ingredient, through='RecipeIngredient', related_name="recipes", blank=True, verbose_name="Malzemeler")
     instructions = models.TextField(verbose_name="Hazırlanışı", help_text="Adımları sırasıyla alt alta yazın.", blank=True, null=True)
     servings = models.CharField(max_length=50, verbose_name="Kaç Kişilik", blank=True, null=True)
+    image = models.ImageField(upload_to='recipes/', blank=True, null=True, verbose_name="Kapak Fotoğrafı (Dosya)")
     image_url = models.URLField(blank=True, null=True, verbose_name="Resim URL")
     author = models.ForeignKey(User, related_name='recipes', on_delete=models.CASCADE, verbose_name="Yazar", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

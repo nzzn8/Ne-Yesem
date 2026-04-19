@@ -5,7 +5,7 @@
 {% block content %}
 <div style="background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 50px;">
     <!-- Hero Image Area -->
-    <div style="position: relative; width: 100%; height: 400px; background: url('{% if recipe.image_url %}{% if "http" in recipe.image_url %}{{ recipe.image_url }}{% else %}{% static recipe.image_url %}{% endif %}{% else %}https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1920&q=80{% endif %}') center/cover no-repeat;">
+    <div style="position: relative; width: 100%; height: 400px; background: url('{% if recipe.image %}{{ recipe.image.url }}{% elif recipe.image_url %}{% if "http" in recipe.image_url %}{{ recipe.image_url }}{% else %}{% static recipe.image_url %}{% endif %}{% else %}https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1920&q=80{% endif %}') center/cover no-repeat;">
         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
                 <h1 style="color: white; font-size: 42px; font-weight: 800; margin-bottom: 10px;">{{ recipe.title }}</h1>

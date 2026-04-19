@@ -41,7 +41,9 @@
         </a>
         {% endif %}
 
-        {% if recipe.image_url %}
+        {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="card-img" style="aspect-ratio: 16/9; width: 100%; object-fit: cover; display: block;">
+        {% elif recipe.image_url %}
             {% if "http" in recipe.image_url %}
             <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img" style="aspect-ratio: 16/9; width: 100%; object-fit: cover; display: block;">
             {% else %}

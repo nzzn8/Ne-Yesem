@@ -5,13 +5,13 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, ListView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib import messages
-from .models import Profile, Recipe
-from .forms import UserUpdateForm, ProfileUpdateForm
+from .models import Profile, Recipe, Ingredient, RecipeIngredient
+from .forms import UserUpdateForm, ProfileUpdateForm, RecipeForm
 
 def home(request):
     return render(request, "home.html")
@@ -194,3 +194,69 @@ def iletisim(request):
         basarili = True
 
     return render(request, "iletisim.html", {"basarili": basarili})
+
+class RecipeCreateView(LoginRequiredMixin, CreateView):
+    model = Recipe
+    form_class = RecipeForm
+    template_name = 'recipe_form.html'
+    success_url = reverse_lazy('account_my_recipes')
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        response = super().form_valid(form)
+        
+        ingredient_names = self.request.POST.getlist('ingredient_name[]')
+        ingredient_quantities = self.request.POST.getlist('ingredient_quantity[]')
+        
+        for name, quantity in zip(ingredient_names, ingredient_quantities):
+            name = name.strip()
+            if name:
+                ingredient, _ = Ingredient.objects.get_or_create(name=name)
+                RecipeIngredient.objects.create(
+                    recipe=self.object,
+                    ingredient=ingredient,
+                    quantity_text=quantity.strip()
+                )
+        messages.success(self.request, 'Tarifiniz başarıyla eklendi!')
+        return response
+
+class RecipeUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Recipe
+    form_class = RecipeForm
+    template_name = 'recipe_form.html'
+    success_url = reverse_lazy('account_my_recipes')
+
+    def test_func(self):
+        return self.get_object().author == self.request.user
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        
+        self.object.recipe_ingredients.all().delete()
+        
+        ingredient_names = self.request.POST.getlist('ingredient_name[]')
+        ingredient_quantities = self.request.POST.getlist('ingredient_quantity[]')
+        
+        for name, quantity in zip(ingredient_names, ingredient_quantities):
+            name = name.strip()
+            if name:
+                ingredient, _ = Ingredient.objects.get_or_create(name=name)
+                RecipeIngredient.objects.create(
+                    recipe=self.object,
+                    ingredient=ingredient,
+                    quantity_text=quantity.strip()
+                )
+        messages.success(self.request, 'Tarifiniz başarıyla güncellendi!')
+        return response
+
+class RecipeDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Recipe
+    template_name = 'recipe_confirm_delete.html'
+    success_url = reverse_lazy('account_my_recipes')
+
+    def test_func(self):
+        return self.get_object().author == self.request.user
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Tarifiniz silindi.')
+        return super().delete(request, *args, **kwargs)
