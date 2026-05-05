@@ -11,6 +11,7 @@ from django.contrib import messages
 from .models import Recipe, Ingredient
 from .forms import RecipeForm
 from .services import sync_recipe_ingredients
+from apps.users.models import Profile
 
 
 def ingredient_autocomplete(request):
@@ -69,8 +70,9 @@ class RecipeListView(ListView):
         context['selected_ingredient'] = self.kwargs.get('ingredient_name')
         context['user_favorites'] = []
         if self.request.user.is_authenticated:
+            profile, _ = Profile.objects.get_or_create(user=self.request.user)
             context['user_favorites'] = list(
-                self.request.user.profile.favorites.values_list('id', flat=True)
+                profile.favorites.values_list('id', flat=True)
             )
         return context
 
@@ -87,7 +89,8 @@ class RecipeDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         is_favorited = False
         if self.request.user.is_authenticated:
-            is_favorited = self.object in self.request.user.profile.favorites.all()
+            profile, _ = Profile.objects.get_or_create(user=self.request.user)
+            is_favorited = self.object in profile.favorites.all()
         context['is_favorited'] = is_favorited
         return context
 
