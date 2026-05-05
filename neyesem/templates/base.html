@@ -284,11 +284,55 @@ document.addEventListener('click', function(e) {
 
 <div class="container">
     {% if messages %}
+        <style>
+          @keyframes msgIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+          .site-msg { display:flex; align-items:center; gap:12px; padding:14px 18px; border-radius:12px;
+                      margin-bottom:14px; font-size:14px; font-weight:500; animation:msgIn .25s ease; }
+          .site-msg.s-success { background:#f0fdf4; border-left:4px solid #22c55e; color:#166534; }
+          .site-msg.s-error   { background:#fef2f2; border-left:4px solid #ef4444; color:#991b1b; }
+          .site-msg.s-warning { background:#fffbeb; border-left:4px solid #f59e0b; color:#92400e; }
+          .site-msg.s-info    { background:#eff6ff; border-left:4px solid #3b82f6; color:#1e40af; }
+          .site-msg-close { margin-left:auto; background:none; border:none; cursor:pointer; color:inherit;
+                            opacity:.55; font-size:14px; padding:2px 6px; border-radius:6px; line-height:1; }
+          .site-msg-close:hover { opacity:1; background:rgba(0,0,0,.07); }
+        </style>
         {% for message in messages %}
-            <div style="padding:12px 20px; background:#f0fdf4; border-left:4px solid #22c55e; color:#166534; border-radius:8px; margin-bottom:20px; font-size:14px; font-weight:500;">
-                <i class="fa-solid fa-circle-check" style="margin-right:8px;"></i>{{ message }}
-            </div>
+          {% if 'success' in message.tags %}
+          <div class="site-msg s-success">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>{{ message }}</span>
+            <button class="site-msg-close" onclick="this.parentElement.remove()" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          {% elif 'error' in message.tags %}
+          <div class="site-msg s-error">
+            <i class="fa-solid fa-circle-xmark"></i>
+            <span>{{ message }}</span>
+            <button class="site-msg-close" onclick="this.parentElement.remove()" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          {% elif 'warning' in message.tags %}
+          <div class="site-msg s-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ message }}</span>
+            <button class="site-msg-close" onclick="this.parentElement.remove()" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          {% else %}
+          <div class="site-msg s-info">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>{{ message }}</span>
+            <button class="site-msg-close" onclick="this.parentElement.remove()" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          {% endif %}
         {% endfor %}
+        <script>
+          document.querySelectorAll('.site-msg').forEach(function(el) {
+            setTimeout(function() {
+              el.style.transition = 'opacity .35s, transform .35s';
+              el.style.opacity = '0';
+              el.style.transform = 'translateY(-8px)';
+              setTimeout(function() { el.remove(); }, 360);
+            }, 4500);
+          });
+        </script>
     {% endif %}
     {% block content %}
     {% endblock %}

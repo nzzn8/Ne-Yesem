@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 
 from .models import Recipe, Ingredient
@@ -96,8 +96,10 @@ class RecipeCreateView(LoginRequiredMixin, CreateView):
     model = Recipe
     form_class = RecipeForm
     template_name = 'recipes/form.html'
-    success_url = reverse_lazy('users:account_my_recipes')
     login_url = 'users:login'
+
+    def get_success_url(self):
+        return reverse('recipes:detail', kwargs={'pk': self.object.pk}) + '?saved=1'
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -107,19 +109,24 @@ class RecipeCreateView(LoginRequiredMixin, CreateView):
             names=self.request.POST.getlist('ingredient_name[]'),
             quantities=self.request.POST.getlist('ingredient_quantity[]'),
         )
-        messages.success(self.request, 'Tarifiniz başarıyla eklendi!')
         return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Lütfen eksik veya hatalı alanları düzeltin.')
+        return super().form_invalid(form)
 
 
 class RecipeUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Recipe
     form_class = RecipeForm
     template_name = 'recipes/form.html'
-    success_url = reverse_lazy('users:account_my_recipes')
     login_url = 'users:login'
 
     def test_func(self):
         return self.get_object().author == self.request.user
+
+    def get_success_url(self):
+        return reverse('recipes:detail', kwargs={'pk': self.object.pk}) + '?updated=1'
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -128,8 +135,11 @@ class RecipeUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             names=self.request.POST.getlist('ingredient_name[]'),
             quantities=self.request.POST.getlist('ingredient_quantity[]'),
         )
-        messages.success(self.request, 'Tarifiniz başarıyla güncellendi!')
         return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Lütfen eksik veya hatalı alanları düzeltin.')
+        return super().form_invalid(form)
 
 
 class RecipeDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

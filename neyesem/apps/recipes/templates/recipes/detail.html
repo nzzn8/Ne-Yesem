@@ -3,6 +3,50 @@
 {% block title %}{{ recipe.title }} - Ne Yesem{% endblock %}
 
 {% block content %}
+
+{% if request.GET.saved or request.GET.updated %}
+<style>
+  .rsb { display:flex; align-items:center; gap:16px; background:white; border:1.5px solid #22c55e;
+         border-radius:16px; padding:20px 24px; margin-bottom:24px;
+         box-shadow:0 4px 20px rgba(34,197,94,.12); animation:rsbIn .3s ease; }
+  @keyframes rsbIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+  .rsb-icon { width:44px; height:44px; border-radius:50%; background:#dcfce7; color:#16a34a;
+              display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .rsb-text strong { font-size:15px; font-weight:700; color:#15803d; display:block; }
+  .rsb-text span   { font-size:13px; color:#4ade80; margin-top:2px; display:block; }
+  .rsb-actions { display:flex; gap:10px; margin-left:auto; flex-wrap:wrap; }
+  .rsb-btn { padding:9px 18px; border-radius:50px; font-size:13px; font-weight:700;
+             text-decoration:none; display:flex; align-items:center; gap:7px; transition:all .2s; }
+  .rsb-btn-edit { background:var(--primary); color:white; box-shadow:0 3px 10px rgba(255,69,0,.25); }
+  .rsb-btn-edit:hover { background:var(--primary-hover); transform:translateY(-1px); }
+  .rsb-btn-list { background:#f1f5f9; color:#374151; }
+  .rsb-btn-list:hover { background:#e2e8f0; }
+  .rsb-close { background:none; border:none; cursor:pointer; color:#a0aec0; font-size:16px;
+               padding:4px 6px; border-radius:6px; flex-shrink:0; transition:color .15s; }
+  .rsb-close:hover { color:#4a5568; }
+</style>
+<div class="rsb" id="recipe-saved-banner">
+  <div class="rsb-icon"><i class="fa-solid fa-circle-check"></i></div>
+  <div class="rsb-text">
+    <strong>{% if request.GET.saved %}Tarifiniz başarıyla yayınlandı!{% else %}Tarifiniz güncellendi!{% endif %}</strong>
+    <span>{% if request.GET.saved %}Harika tarif! Aşağıda önizleyebilirsiniz.{% else %}Yaptığınız değişiklikler kaydedildi.{% endif %}</span>
+  </div>
+  <div class="rsb-actions">
+    {% if user == recipe.author %}
+    <a href="{% url 'recipes:update' recipe.pk %}" class="rsb-btn rsb-btn-edit">
+      <i class="fa-solid fa-pen"></i> Düzenle
+    </a>
+    {% endif %}
+    <a href="{% url 'users:account_my_recipes' %}" class="rsb-btn rsb-btn-list">
+      <i class="fa-solid fa-list"></i> Tariflerime Git
+    </a>
+  </div>
+  <button class="rsb-close" onclick="document.getElementById('recipe-saved-banner').remove()" aria-label="Kapat">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+</div>
+{% endif %}
+
 <div style="background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 50px;">
     <div style="position: relative; width: 100%; height: 400px; background: url('{% if recipe.image %}{{ recipe.image.url }}{% elif recipe.image_url %}{% if "http" in recipe.image_url %}{{ recipe.image_url }}{% else %}{% static recipe.image_url %}{% endif %}{% else %}https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1920&q=80{% endif %}') center/cover no-repeat;">
         <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); display: flex; justify-content: space-between; align-items: flex-end;">
