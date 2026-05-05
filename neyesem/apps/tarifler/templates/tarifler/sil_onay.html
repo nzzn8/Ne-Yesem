@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Tarifi Sil - Tarifler Yönetimi{% endblock %}
+
+{% block content %}
+<style>
+  .del-wrap { max-width:520px; margin:40px auto; }
+  .del-card { background:white; border-radius:20px; box-shadow:0 8px 28px rgba(0,0,0,.08);
+              padding:40px; text-align:center; animation:fadeUp .3s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);} }
+  .del-icon { width:72px; height:72px; border-radius:50%; background:#fef2f2;
+              display:flex; align-items:center; justify-content:center;
+              font-size:32px; color:#ef4444; margin:0 auto 20px; }
+  .del-title { font-size:22px; font-weight:800; color:var(--text-main); margin-bottom:10px; }
+  .del-name  { font-size:16px; font-weight:700; color:var(--primary); margin-bottom:10px; }
+  .del-warn  { font-size:14px; color:var(--text-muted); line-height:1.6; margin-bottom:28px; }
+  .del-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .del-btn-cancel { padding:12px 28px; border-radius:50px; background:#f1f5f9; color:#4a5568;
+                    font-weight:600; font-size:14px; text-decoration:none; border:none;
+                    cursor:pointer; transition:background .2s; }
+  .del-btn-cancel:hover { background:#e2e8f0; }
+  .del-btn-confirm { padding:12px 28px; border-radius:50px; background:#ef4444; color:white;
+                     font-weight:700; font-size:14px; border:none; cursor:pointer;
+                     box-shadow:0 4px 12px rgba(239,68,68,.3); transition:all .2s;
+                     display:flex; align-items:center; gap:8px; }
+  .del-btn-confirm:hover { background:#dc2626; transform:translateY(-1px); }
+</style>
+
+<div class="del-wrap">
+  <div class="del-card">
+    <div class="del-icon"><i class="fa-solid fa-trash"></i></div>
+    <div class="del-title">Tarifi Silmek İstediğinize Emin Misiniz?</div>
+    <div class="del-name">{{ object.baslik }}</div>
+    <div class="del-warn">
+      Bu işlem geri alınamaz. Tarife ait tüm malzeme ve adım bilgileri
+      kalıcı olarak silinecektir.
+    </div>
+    <div class="del-actions">
+      <a href="{% url 'tarifler:detay' object.pk %}" class="del-btn-cancel">
+        <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>Vazgeç
+      </a>
+      <form method="POST" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="del-btn-confirm">
+          <i class="fa-solid fa-trash"></i> Evet, Sil
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

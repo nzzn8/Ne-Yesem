@@ -15,6 +15,7 @@ urlpatterns = [
     path('', include('apps.users.urls', namespace='users')),
     path('', include('apps.recipes.urls', namespace='recipes')),
     path('', include('apps.contact.urls', namespace='contact')),
+    path('yonetim/tarifler/', include('apps.tarifler.urls', namespace='tarifler')),
 ]
 
 if settings.DEBUG:

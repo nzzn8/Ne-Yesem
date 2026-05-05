@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ tarif.baslik }} - Tarifler Yönetimi{% endblock %}
+
+{% block content %}
+
+{% if request.GET.saved or request.GET.updated %}
+<style>
+  .rsb { display:flex; align-items:center; gap:16px; background:white; border:1.5px solid #22c55e;
+         border-radius:16px; padding:20px 24px; margin-bottom:24px;
+         box-shadow:0 4px 20px rgba(34,197,94,.12); animation:rsbIn .3s ease; }
+  @keyframes rsbIn { from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);} }
+  .rsb-icon { width:44px;height:44px;border-radius:50%;background:#dcfce7;color:#16a34a;
+              display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
+  .rsb-text strong { font-size:15px;font-weight:700;color:#15803d;display:block; }
+  .rsb-text span   { font-size:13px;color:#4ade80;margin-top:2px;display:block; }
+  .rsb-actions { display:flex;gap:10px;margin-left:auto;flex-wrap:wrap; }
+  .rsb-btn { padding:9px 18px;border-radius:50px;font-size:13px;font-weight:700;
+             text-decoration:none;display:flex;align-items:center;gap:7px;transition:all .2s; }
+  .rsb-btn-edit { background:var(--primary);color:white;box-shadow:0 3px 10px rgba(255,69,0,.25); }
+  .rsb-btn-edit:hover { background:var(--primary-hover);transform:translateY(-1px); }
+  .rsb-btn-list { background:#f1f5f9;color:#374151; }
+  .rsb-btn-list:hover { background:#e2e8f0; }
+  .rsb-close { background:none;border:none;cursor:pointer;color:#a0aec0;font-size:16px;
+               padding:4px 6px;border-radius:6px;flex-shrink:0;transition:color .15s; }
+  .rsb-close:hover { color:#4a5568; }
+</style>
+<div class="rsb" id="saved-banner">
+  <div class="rsb-icon"><i class="fa-solid fa-circle-check"></i></div>
+  <div class="rsb-text">
+    <strong>{% if request.GET.saved %}Tarif başarıyla yayınlandı!{% else %}Tarif güncellendi!{% endif %}</strong>
+    <span>{% if request.GET.saved %}Harika! Tarifinizi aşağıda önizleyebilirsiniz.{% else %}Değişiklikler kaydedildi.{% endif %}</span>
+  </div>
+  <div class="rsb-actions">
+    {% if user == tarif.yazar %}
+    <a href="{% url 'tarifler:duzenle' tarif.pk %}" class="rsb-btn rsb-btn-edit">
+      <i class="fa-solid fa-pen"></i> Düzenle
+    </a>
+    {% endif %}
+    <a href="{% url 'tarifler:liste' %}" class="rsb-btn rsb-btn-list">
+      <i class="fa-solid fa-list"></i> Listeye Dön
+    </a>
+  </div>
+  <button class="rsb-close" onclick="document.getElementById('saved-banner').remove()">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+</div>
+{% endif %}
+
+<style>
+  .td-wrap { background:white; border-radius:20px; box-shadow:0 8px 28px rgba(0,0,0,.07);
+             overflow:hidden; margin-bottom:40px; }
+
+  .td-hero { position:relative; width:100%; height:380px; overflow:hidden; }
+  .td-hero-img { width:100%; height:100%; object-fit:cover; }
+  .td-hero-fallback { width:100%; height:100%;
+                      background:linear-gradient(135deg,#fff8f6 0%,#ffe4d6 100%);
+                      display:flex; align-items:center; justify-content:center;
+                      font-size:80px; color:#ffb899; }
+  .td-hero-overlay { position:absolute; inset:0;
+                     background:linear-gradient(transparent 35%, rgba(0,0,0,.75));
+                     display:flex; justify-content:space-between; align-items:flex-end;
+                     padding:32px 36px; }
+  .td-hero-info h1 { color:white; font-size:36px; font-weight:800; line-height:1.2; }
+  .td-hero-info p  { color:#e2e8f0; font-size:15px; margin-top:8px; max-width:680px; line-height:1.6; }
+  .td-hero-actions { display:flex; gap:10px; flex-shrink:0; }
+  .td-hero-btn { padding:10px 18px; border-radius:50px; font-size:13px; font-weight:700;
+                 text-decoration:none; display:flex; align-items:center; gap:7px; transition:all .2s; }
+  .td-hero-btn-edit { background:var(--primary); color:white; }
+  .td-hero-btn-edit:hover { background:var(--primary-hover); }
+  .td-hero-btn-del  { background:rgba(255,255,255,.15); color:white; border:1.5px solid rgba(255,255,255,.4); }
+  .td-hero-btn-del:hover { background:rgba(239,68,68,.85); border-color:transparent; }
+
+  .td-meta { display:flex; background:#fafafa; border-bottom:1px solid #edf2f7;
+             padding:18px 36px; gap:0; flex-wrap:wrap; }
+  .td-meta-item { flex:1; text-align:center; padding:10px 16px; min-width:120px; }
+  .td-meta-item + .td-meta-item { border-left:1px solid #edf2f7; }
+  .td-meta-icon { font-size:22px; color:var(--primary); margin-bottom:6px; }
+  .td-meta-label { font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase;
+                   letter-spacing:.5px; }
+  .td-meta-val { font-size:16px; font-weight:800; color:var(--text-main); margin-top:4px; }
+
+  .td-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 12px;
+              border-radius:50px; font-size:12px; font-weight:700; }
+  .td-badge-kolay { background:#dcfce7; color:#16a34a; }
+  .td-badge-orta  { background:#fef9c3; color:#a16207; }
+  .td-badge-zor   { background:#fee2e2; color:#dc2626; }
+
+  .td-body { display:grid; grid-template-columns:1fr 2fr; gap:36px; padding:36px; }
+  @media(max-width:768px) { .td-body { grid-template-columns:1fr; } }
+
+  .td-ing-box { background:#fff8f6; border:1px solid #ffedd5; border-radius:14px; padding:24px; }
+  .td-ing-title { font-size:17px; font-weight:800; margin-bottom:16px;
+                  display:flex; align-items:center; gap:9px; color:var(--text-main); }
+  .td-ing-title i { color:var(--primary); }
+  .td-ing-list { display:flex; flex-wrap:wrap; gap:8px; }
+  .td-ing-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 14px;
+                 background:white; border:1px solid #ffedd5; border-radius:50px;
+                 font-size:13px; font-weight:600; color:var(--primary); }
+  .td-ing-chip .qty { color:#718096; font-weight:500; margin-right:2px; }
+
+  .td-steps-title { font-size:20px; font-weight:800; margin-bottom:20px;
+                    display:flex; align-items:center; gap:9px; color:var(--text-main); }
+  .td-steps-title i { color:var(--primary); }
+  .td-step-item { display:flex; gap:14px; align-items:flex-start;
+                  background:#fafafa; border:1px solid #edf2f7; border-radius:12px;
+                  padding:18px; margin-bottom:14px; }
+  .td-step-num { width:32px; height:32px; border-radius:50%; background:var(--primary);
+                 color:white; font-size:13px; font-weight:800; display:flex;
+                 align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+  .td-step-text { font-size:15px; color:#4a5568; line-height:1.7; }
+
+  .td-back { display:inline-flex; align-items:center; gap:7px; color:var(--text-muted);
+             font-size:13px; font-weight:600; text-decoration:none; margin-bottom:20px;
+             padding:8px 14px; border-radius:9px; transition:all .15s; }
+  .td-back:hover { background:#f1f5f9; color:var(--text-main); }
+</style>
+
+<a href="{% url 'tarifler:liste' %}" class="td-back">
+  <i class="fa-solid fa-arrow-left"></i> Tariflere Dön
+</a>
+
+<div class="td-wrap">
+
+  <!-- Hero -->
+  <div class="td-hero">
+    {% if tarif.resim %}
+      <img src="{{ tarif.resim.url }}" alt="{{ tarif.baslik }}" class="td-hero-img">
+    {% elif tarif.resim_url %}
+      <img src="{{ tarif.resim_url }}" alt="{{ tarif.baslik }}" class="td-hero-img"
+           onerror="this.style.display='none'; document.getElementById('hero-fallback').style.display='flex';">
+      <div id="hero-fallback" class="td-hero-fallback" style="display:none;"><i class="fa-solid fa-bowl-food"></i></div>
+    {% else %}
+      <div class="td-hero-fallback"><i class="fa-solid fa-bowl-food"></i></div>
+    {% endif %}
+    <div class="td-hero-overlay">
+      <div class="td-hero-info">
+        <h1>{{ tarif.baslik }}</h1>
+        <p>{{ tarif.aciklama }}</p>
+      </div>
+      {% if user == tarif.yazar %}
+      <div class="td-hero-actions">
+        <a href="{% url 'tarifler:duzenle' tarif.pk %}" class="td-hero-btn td-hero-btn-edit">
+          <i class="fa-solid fa-pen"></i> Düzenle
+        </a>
+        <a href="{% url 'tarifler:sil' tarif.pk %}" class="td-hero-btn td-hero-btn-del">
+          <i class="fa-solid fa-trash"></i> Sil
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Meta bilgiler -->
+  <div class="td-meta">
+    <div class="td-meta-item">
+      <div class="td-meta-icon"><i class="fa-regular fa-clock"></i></div>
+      <div class="td-meta-label">Süre</div>
+      <div class="td-meta-val">{{ tarif.hazirlanma_suresi }}</div>
+    </div>
+    <div class="td-meta-item">
+      <div class="td-meta-icon"><i class="fa-solid fa-fire"></i></div>
+      <div class="td-meta-label">Zorluk</div>
+      <div class="td-meta-val">
+        <span class="td-badge {% if tarif.zorluk == 'Kolay' %}td-badge-kolay{% elif tarif.zorluk == 'Orta' %}td-badge-orta{% else %}td-badge-zor{% endif %}">
+          {{ tarif.zorluk }}
+        </span>
+      </div>
+    </div>
+    {% if tarif.porsiyon %}
+    <div class="td-meta-item">
+      <div class="td-meta-icon"><i class="fa-solid fa-users"></i></div>
+      <div class="td-meta-label">Porsiyon</div>
+      <div class="td-meta-val">{{ tarif.porsiyon }}</div>
+    </div>
+    {% endif %}
+    {% if tarif.kategori %}
+    <div class="td-meta-item">
+      <div class="td-meta-icon"><i class="fa-solid fa-tag"></i></div>
+      <div class="td-meta-label">Kategori</div>
+      <div class="td-meta-val">{{ tarif.kategori.ad }}</div>
+    </div>
+    {% endif %}
+    <div class="td-meta-item">
+      <div class="td-meta-icon"><i class="fa-solid fa-user-pen"></i></div>
+      <div class="td-meta-label">Yazar</div>
+      <div class="td-meta-val">{{ tarif.yazar.get_full_name|default:tarif.yazar.username }}</div>
+    </div>
+  </div>
+
+  <!-- İçerik -->
+  <div class="td-body">
+    <!-- Malzemeler -->
+    <div class="td-ing-box">
+      <div class="td-ing-title"><i class="fa-solid fa-basket-shopping"></i> Malzemeler</div>
+      <div class="td-ing-list">
+        {% for tm in tarif.tarif_malzemeleri.all %}
+        <div class="td-ing-chip">
+          <i class="fa-solid fa-leaf" style="font-size:11px;"></i>
+          {% if tm.miktar %}<span class="qty">{{ tm.miktar }}</span>{% endif %}
+          {{ tm.malzeme.ad }}
+        </div>
+        {% empty %}
+        <p style="color:#a0aec0; font-size:13px;">Malzeme eklenmemiş.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Adımlar -->
+    <div>
+      <div class="td-steps-title"><i class="fa-solid fa-list-ol"></i> Hazırlanış</div>
+      {% if tarif.talimatlar %}
+        {% for adim in tarif.talimatlar.splitlines %}
+          {% if adim.strip %}
+          <div class="td-step-item">
+            <div class="td-step-num">{{ forloop.counter }}</div>
+            <div class="td-step-text">{{ adim }}</div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <p style="color:#a0aec0; font-size:14px;">Hazırlanış adımları eklenmemiş.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

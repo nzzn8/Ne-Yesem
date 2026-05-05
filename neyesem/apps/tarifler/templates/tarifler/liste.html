@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Tarifler Yönetimi - Ne Yesem{% endblock %}
+
+{% block content %}
+<style>
+  .tl-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:14px; }
+  .tl-title  { font-size:26px; font-weight:800; color:var(--text-main); }
+  .tl-title span { color:var(--primary); }
+  .tl-add-btn { display:flex; align-items:center; gap:8px; padding:11px 22px;
+                background:var(--primary); color:white; border-radius:50px; font-size:14px;
+                font-weight:700; text-decoration:none; box-shadow:0 4px 12px rgba(255,69,0,.28);
+                transition:all .2s; }
+  .tl-add-btn:hover { background:var(--primary-hover); transform:translateY(-1px); }
+
+  /* Filtre çubuğu */
+  .tl-filters { background:white; border-radius:14px; padding:18px 22px;
+                box-shadow:0 2px 10px rgba(0,0,0,.05); margin-bottom:24px;
+                display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+  .tl-filter-field { display:flex; flex-direction:column; gap:5px; flex:1; min-width:160px; }
+  .tl-filter-label { font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:.5px; }
+  .tl-filter-input { padding:9px 13px; border:1.5px solid #e2e8f0; border-radius:9px;
+                     font-size:13px; background:#f9fafb; color:var(--text-main);
+                     transition:border-color .2s; }
+  .tl-filter-input:focus { outline:none; border-color:var(--primary); background:white; }
+  .tl-filter-btn { padding:10px 20px; border-radius:9px; border:none; font-size:13px;
+                   font-weight:700; cursor:pointer; transition:all .2s; }
+  .tl-filter-btn-ara  { background:var(--primary); color:white; }
+  .tl-filter-btn-ara:hover { background:var(--primary-hover); }
+  .tl-filter-btn-temizle { background:#f1f5f9; color:#4a5568; text-decoration:none;
+                            display:flex; align-items:center; gap:6px; }
+  .tl-filter-btn-temizle:hover { background:#e2e8f0; }
+
+  /* İstatistik bar */
+  .tl-stats { display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+  .tl-stat  { background:white; border-radius:12px; padding:14px 20px; flex:1; min-width:120px;
+              box-shadow:0 2px 8px rgba(0,0,0,.05); text-align:center; }
+  .tl-stat-val  { font-size:24px; font-weight:800; color:var(--primary); }
+  .tl-stat-lbl  { font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+  /* Kart grid */
+  .tl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
+
+  .tl-card { background:white; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,.06);
+             border:1px solid #f1f5f9; overflow:hidden; display:flex; flex-direction:column;
+             transition:transform .2s, box-shadow .2s; text-decoration:none; color:inherit; }
+  .tl-card:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,.10); }
+
+  .tl-card-img { width:100%; height:180px; object-fit:cover; background:#f8fafc; }
+  .tl-card-img-placeholder { width:100%; height:180px; background:linear-gradient(135deg,#fff8f6,#ffe4d6);
+                              display:flex; align-items:center; justify-content:center;
+                              font-size:48px; color:#ffb899; }
+  .tl-card-body { padding:18px; flex:1; display:flex; flex-direction:column; gap:8px; }
+  .tl-card-cat  { font-size:11px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:.5px; }
+  .tl-card-title { font-size:16px; font-weight:800; color:var(--text-main); line-height:1.3; }
+  .tl-card-desc  { font-size:13px; color:var(--text-muted); line-height:1.5;
+                   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .tl-card-meta  { display:flex; gap:12px; margin-top:auto; padding-top:12px;
+                   border-top:1px solid #f1f5f9; flex-wrap:wrap; }
+  .tl-card-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:50px;
+                   display:flex; align-items:center; gap:4px; }
+  .tl-badge-kolay { background:#dcfce7; color:#16a34a; }
+  .tl-badge-orta  { background:#fef9c3; color:#a16207; }
+  .tl-badge-zor   { background:#fee2e2; color:#dc2626; }
+
+  .tl-card-actions { display:flex; gap:6px; padding:12px 18px; border-top:1px solid #f8fafc;
+                     background:#fafafa; }
+  .tl-act-btn { flex:1; padding:8px; border-radius:8px; border:none; font-size:12px;
+                font-weight:700; cursor:pointer; text-decoration:none; display:flex;
+                align-items:center; justify-content:center; gap:5px; transition:all .15s; }
+  .tl-act-detail { background:#eff6ff; color:#1d4ed8; }
+  .tl-act-detail:hover { background:#dbeafe; }
+  .tl-act-edit   { background:#fff8f6; color:var(--primary); }
+  .tl-act-edit:hover { background:#ffe4d6; }
+  .tl-act-del    { background:#fef2f2; color:#dc2626; }
+  .tl-act-del:hover { background:#fee2e2; }
+
+  .tl-empty { text-align:center; padding:80px 20px; color:var(--text-muted); }
+  .tl-empty i { font-size:64px; color:#e2e8f0; margin-bottom:20px; display:block; }
+  .tl-empty strong { font-size:18px; color:var(--text-main); display:block; margin-bottom:8px; }
+
+  /* Pagination */
+  .tl-page { display:flex; justify-content:center; gap:8px; margin-top:32px; flex-wrap:wrap; }
+  .tl-page a, .tl-page span { padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600;
+                               text-decoration:none; transition:all .15s; }
+  .tl-page a { background:white; color:var(--text-main); border:1px solid #e2e8f0; }
+  .tl-page a:hover { border-color:var(--primary); color:var(--primary); }
+  .tl-page span { background:var(--primary); color:white; border:1px solid var(--primary); }
+</style>
+
+<div class="tl-header">
+  <div>
+    <div class="tl-title">Tarifler <span>Yönetimi</span></div>
+    <div style="font-size:13px; color:var(--text-muted); margin-top:4px;">
+      Tüm tarifleri buradan yönetebilirsiniz
+    </div>
+  </div>
+  {% if user.is_authenticated %}
+  <a href="{% url 'tarifler:ekle' %}" class="tl-add-btn">
+    <i class="fa-solid fa-plus"></i> Yeni Tarif Ekle
+  </a>
+  {% endif %}
+</div>
+
+<!-- Filtreler -->
+<form method="GET" class="tl-filters">
+  <div class="tl-filter-field" style="flex:2;">
+    <label class="tl-filter-label">Arama</label>
+    <input type="text" name="q" value="{{ arama }}" placeholder="Tarif adı veya malzeme..." class="tl-filter-input">
+  </div>
+  <div class="tl-filter-field">
+    <label class="tl-filter-label">Kategori</label>
+    <select name="kategori" class="tl-filter-input">
+      <option value="">Tümü</option>
+      {% for kat in kategoriler %}
+      <option value="{{ kat.pk }}" {% if secili_kategori == kat.pk|stringformat:"s" %}selected{% endif %}>
+        {{ kat.ad }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="tl-filter-field">
+    <label class="tl-filter-label">Zorluk</label>
+    <select name="zorluk" class="tl-filter-input">
+      <option value="">Tümü</option>
+      <option value="Kolay" {% if secili_zorluk == "Kolay" %}selected{% endif %}>Kolay</option>
+      <option value="Orta"  {% if secili_zorluk == "Orta"  %}selected{% endif %}>Orta</option>
+      <option value="Zor"   {% if secili_zorluk == "Zor"   %}selected{% endif %}>Zor</option>
+    </select>
+  </div>
+  <div style="display:flex; gap:8px; align-items:flex-end;">
+    <button type="submit" class="tl-filter-btn tl-filter-btn-ara">
+      <i class="fa-solid fa-magnifying-glass"></i> Ara
+    </button>
+    {% if arama or secili_kategori or secili_zorluk %}
+    <a href="{% url 'tarifler:liste' %}" class="tl-filter-btn tl-filter-btn-temizle">
+      <i class="fa-solid fa-xmark"></i> Temizle
+    </a>
+    {% endif %}
+  </div>
+</form>
+
+<!-- İstatistikler -->
+<div class="tl-stats">
+  <div class="tl-stat">
+    <div class="tl-stat-val">{{ toplam }}</div>
+    <div class="tl-stat-lbl">Tarif Bulundu</div>
+  </div>
+  {% if not arama and not secili_kategori and not secili_zorluk %}
+  <div class="tl-stat">
+    <div class="tl-stat-val">{{ kategoriler.count }}</div>
+    <div class="tl-stat-lbl">Kategori</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Kartlar -->
+{% if tarifler %}
+<div class="tl-grid">
+  {% for tarif in tarifler %}
+  <div class="tl-card">
+    {% if tarif.resim %}
+      <img src="{{ tarif.resim.url }}" alt="{{ tarif.baslik }}" class="tl-card-img">
+    {% elif tarif.resim_url %}
+      <img src="{{ tarif.resim_url }}" alt="{{ tarif.baslik }}" class="tl-card-img"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="tl-card-img-placeholder" style="display:none;"><i class="fa-solid fa-bowl-food"></i></div>
+    {% else %}
+      <div class="tl-card-img-placeholder"><i class="fa-solid fa-bowl-food"></i></div>
+    {% endif %}
+
+    <div class="tl-card-body">
+      {% if tarif.kategori %}
+      <div class="tl-card-cat"><i class="fa-solid fa-tag"></i> {{ tarif.kategori.ad }}</div>
+      {% endif %}
+      <div class="tl-card-title">{{ tarif.baslik }}</div>
+      <div class="tl-card-desc">{{ tarif.aciklama }}</div>
+      <div class="tl-card-meta">
+        <span class="tl-card-badge {% if tarif.zorluk == 'Kolay' %}tl-badge-kolay{% elif tarif.zorluk == 'Orta' %}tl-badge-orta{% else %}tl-badge-zor{% endif %}">
+          {% if tarif.zorluk == 'Kolay' %}<i class="fa-solid fa-seedling"></i>
+          {% elif tarif.zorluk == 'Orta' %}<i class="fa-solid fa-fire-flame-simple"></i>
+          {% else %}<i class="fa-solid fa-fire"></i>{% endif %}
+          {{ tarif.zorluk }}
+        </span>
+        <span style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:4px;">
+          <i class="fa-regular fa-clock"></i> {{ tarif.hazirlanma_suresi }}
+        </span>
+        <span style="font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:4px;">
+          <i class="fa-solid fa-user"></i> {{ tarif.yazar.get_full_name|default:tarif.yazar.username }}
+        </span>
+      </div>
+    </div>
+
+    <div class="tl-card-actions">
+      <a href="{% url 'tarifler:detay' tarif.pk %}" class="tl-act-btn tl-act-detail">
+        <i class="fa-solid fa-eye"></i> Görüntüle
+      </a>
+      {% if user == tarif.yazar %}
+      <a href="{% url 'tarifler:duzenle' tarif.pk %}" class="tl-act-btn tl-act-edit">
+        <i class="fa-solid fa-pen"></i> Düzenle
+      </a>
+      <a href="{% url 'tarifler:sil' tarif.pk %}" class="tl-act-btn tl-act-del">
+        <i class="fa-solid fa-trash"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if is_paginated %}
+<div class="tl-page">
+  {% if page_obj.has_previous %}
+    <a href="?page=1{% if arama %}&q={{ arama }}{% endif %}">«</a>
+    <a href="?page={{ page_obj.previous_page_number }}{% if arama %}&q={{ arama }}{% endif %}">‹</a>
+  {% endif %}
+  <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if arama %}&q={{ arama }}{% endif %}">›</a>
+    <a href="?page={{ page_obj.paginator.num_pages }}{% if arama %}&q={{ arama }}{% endif %}">»</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="tl-empty">
+  <i class="fa-solid fa-bowl-food"></i>
+  <strong>{% if arama %}Sonuç bulunamadı{% else %}Henüz tarif eklenmemiş{% endif %}</strong>
+  {% if arama %}
+    <p>Farklı anahtar kelimelerle tekrar deneyin.</p>
+  {% elif user.is_authenticated %}
+    <a href="{% url 'tarifler:ekle' %}" class="tl-add-btn" style="display:inline-flex; margin-top:16px;">
+      <i class="fa-solid fa-plus"></i> İlk Tarifi Ekle
+    </a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
