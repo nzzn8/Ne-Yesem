@@ -8,9 +8,22 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from django.contrib import messages
 
-from .models import Recipe
+from .models import Recipe, Ingredient
 from .forms import RecipeForm
 from .services import sync_recipe_ingredients
+
+
+def ingredient_autocomplete(request):
+    q = request.GET.get('q', '').strip()
+    if len(q) < 2:
+        return JsonResponse({'results': []})
+    results = list(
+        Ingredient.objects
+        .filter(name__icontains=q)
+        .order_by('name')
+        .values_list('name', flat=True)[:12]
+    )
+    return JsonResponse({'results': results})
 
 
 class RecipeListView(ListView):

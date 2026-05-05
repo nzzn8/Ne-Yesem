@@ -11,4 +11,5 @@ urlpatterns = [
     path('tarif/<int:pk>/duzenle/', views.RecipeUpdateView.as_view(), name='update'),
     path('tarif/<int:pk>/sil/', views.RecipeDeleteView.as_view(), name='delete'),
     path('tarif/<int:recipe_id>/favori/', views.toggle_favorite, name='toggle_favorite'),
+    path('api/malzeme-onerileri/', views.ingredient_autocomplete, name='ingredient_autocomplete'),
 ]

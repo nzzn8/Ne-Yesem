@@ -92,6 +92,23 @@
                 width: 100%; justify-content: center; transition: all .2s; }
   .rf-add-btn:hover { border-color: var(--primary); background: #fff8f6; }
 
+  /* ── Malzeme autocomplete ── */
+  .rf-ac-wrap { position: relative; }
+  .rf-ac-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 500;
+                    background: white; border: 1.5px solid #e2e8f0; border-radius: 10px;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.10); overflow: hidden;
+                    display: none; max-height: 220px; overflow-y: auto; }
+  .rf-ac-dropdown.open { display: block; }
+  .rf-ac-item { padding: 10px 14px; font-size: 14px; color: var(--text-main); cursor: pointer;
+                display: flex; align-items: center; gap: 8px; transition: background .15s; }
+  .rf-ac-item:hover, .rf-ac-item.active { background: #fff8f6; color: var(--primary); }
+  .rf-ac-item i { color: #cbd5e1; font-size: 12px; flex-shrink: 0; }
+  .rf-ac-item mark { background: #fff0eb; color: var(--primary); font-weight: 700;
+                     border-radius: 3px; padding: 0 2px; }
+  .rf-ac-empty { padding: 12px 14px; font-size: 13px; color: var(--text-muted); text-align: center; }
+  .rf-ac-new { background: #f8fafc; border-top: 1px solid #f1f5f9; }
+  .rf-ac-new i { color: var(--primary) !important; }
+
   /* ── Adım satırları ── */
   .rf-step-row { display: grid; grid-template-columns: 40px 1fr 36px;
                  gap: 10px; align-items: flex-start; padding: 10px 0;
@@ -335,8 +352,11 @@
           {% for ri in object.recipe_ingredients.all %}
           <div class="rf-ing-row">
             <div class="rf-ing-num">{{ forloop.counter }}</div>
-            <input type="text" name="ingredient_name[]" value="{{ ri.ingredient.name }}"
-                   placeholder="Örn: Un, Yumurta..." class="rf-input" required>
+            <div class="rf-ac-wrap">
+              <input type="text" name="ingredient_name[]" value="{{ ri.ingredient.name }}"
+                     placeholder="Malzeme adı yazın..." class="rf-input ing-name-input" required autocomplete="off">
+              <div class="rf-ac-dropdown"></div>
+            </div>
             <input type="text" name="ingredient_quantity[]" value="{{ ri.quantity_text|default:'' }}"
                    placeholder="Örn: 2 yemek k." class="rf-input">
             <button type="button" class="rf-del-btn" onclick="removeRow(this, 'ingredients-container', renumberIngredients)" title="Sil">
@@ -347,7 +367,11 @@
         {% else %}
           <div class="rf-ing-row">
             <div class="rf-ing-num">1</div>
-            <input type="text" name="ingredient_name[]" placeholder="Örn: Un, Yumurta..." class="rf-input" required>
+            <div class="rf-ac-wrap">
+              <input type="text" name="ingredient_name[]" placeholder="Malzeme adı yazın..."
+                     class="rf-input ing-name-input" required autocomplete="off">
+              <div class="rf-ac-dropdown"></div>
+            </div>
             <input type="text" name="ingredient_quantity[]" placeholder="Örn: 2 yemek k." class="rf-input">
             <button type="button" class="rf-del-btn" onclick="removeRow(this, 'ingredients-container', renumberIngredients)" title="Sil">
               <i class="fa-solid fa-trash"></i>
@@ -496,6 +520,87 @@ function updateCounter(el, counterId, max) {
   if (desc && desc.value) updateCounter(desc, 'desc-counter', 500);
 })();
 
+/* ─── Malzeme otomatik tamamlama ─── */
+const AC_URL = '{% url "recipes:ingredient_autocomplete" %}';
+
+function attachAutocomplete(input) {
+  const dropdown = input.nextElementSibling;
+  let timer = null;
+  let activeIdx = -1;
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function highlight(q, text) {
+    const i = text.toLowerCase().indexOf(q.toLowerCase());
+    if (i === -1) return escHtml(text);
+    return escHtml(text.slice(0,i)) + '<mark>' + escHtml(text.slice(i, i+q.length)) + '</mark>' + escHtml(text.slice(i+q.length));
+  }
+  function renderItems(items, q) {
+    activeIdx = -1;
+    const exact = items.some(n => n.toLowerCase() === q.toLowerCase());
+    let html = items.map(name =>
+      `<div class="rf-ac-item" data-val="${escHtml(name)}"><i class="fa-solid fa-leaf"></i><span>${highlight(q, name)}</span></div>`
+    ).join('');
+    if (!exact) {
+      html += `<div class="rf-ac-item rf-ac-new" data-val="${escHtml(q)}"><i class="fa-solid fa-plus"></i><span>"<strong>${escHtml(q)}</strong>" yeni malzeme olarak ekle</span></div>`;
+    }
+    dropdown.innerHTML = html;
+    dropdown.querySelectorAll('.rf-ac-item').forEach(item => {
+      item.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        input.value = this.dataset.val;
+        closeDropdown();
+      });
+    });
+  }
+  function openDropdown()  { dropdown.classList.add('open'); }
+  function closeDropdown() { dropdown.classList.remove('open'); activeIdx = -1; }
+
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    const q = this.value.trim();
+    if (q.length < 2) { closeDropdown(); return; }
+    timer = setTimeout(async () => {
+      try {
+        const res  = await fetch(`${AC_URL}?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        renderItems(data.results, q);
+        openDropdown();
+      } catch(e) {}
+    }, 200);
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (!dropdown.classList.contains('open')) return;
+    const items = [...dropdown.querySelectorAll('.rf-ac-item')];
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+      items.forEach((it, i) => it.classList.toggle('active', i === activeIdx));
+      if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      items.forEach((it, i) => it.classList.toggle('active', i === activeIdx));
+      if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter' && activeIdx >= 0 && items[activeIdx]) {
+      e.preventDefault();
+      input.value = items[activeIdx].dataset.val;
+      closeDropdown();
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+    }
+  });
+
+  input.addEventListener('blur', () => setTimeout(closeDropdown, 150));
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.rf-ac-wrap'))
+    document.querySelectorAll('.rf-ac-dropdown.open').forEach(d => d.classList.remove('open'));
+});
+
 /* ─── Malzeme satırları ─── */
 function renumberIngredients() {
   document.querySelectorAll('#ingredients-container .rf-ing-num').forEach((el, i) => {
@@ -511,16 +616,23 @@ function addIngredientRow() {
   row.className = 'rf-ing-row';
   row.innerHTML = `
     <div class="rf-ing-num">${num}</div>
-    <input type="text" name="ingredient_name[]" placeholder="Örn: Un, Yumurta..." class="rf-input" required>
+    <div class="rf-ac-wrap">
+      <input type="text" name="ingredient_name[]" placeholder="Malzeme adı yazın..."
+             class="rf-input ing-name-input" required autocomplete="off">
+      <div class="rf-ac-dropdown"></div>
+    </div>
     <input type="text" name="ingredient_quantity[]" placeholder="Örn: 2 yemek k." class="rf-input">
     <button type="button" class="rf-del-btn" onclick="removeRow(this,'ingredients-container',renumberIngredients)" title="Sil">
       <i class="fa-solid fa-trash"></i>
     </button>`;
   cont.appendChild(row);
   renumberIngredients();
-  row.querySelector('input').focus();
+  const newInput = row.querySelector('.ing-name-input');
+  attachAutocomplete(newInput);
+  newInput.focus();
 }
 renumberIngredients();
+document.querySelectorAll('.ing-name-input').forEach(attachAutocomplete);
 
 /* ─── Adım satırları ─── */
 function renumberSteps() {
