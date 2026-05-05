@@ -63,15 +63,39 @@
   .rf-grid-4 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; }
   @media (max-width: 640px) { .rf-grid-2, .rf-grid-4 { grid-template-columns: 1fr; } }
 
-  /* ── Zorluk seçici ── */
-  .rf-difficulty-group { display: flex; gap: 10px; flex-wrap: wrap; }
-  .rf-diff-btn { padding: 9px 20px; border-radius: 50px; border: 2px solid #e2e8f0;
-                 font-size: 13px; font-weight: 700; cursor: pointer; background: white;
-                 color: #718096; transition: all .2s; }
-  .rf-diff-btn:hover { border-color: var(--primary); color: var(--primary); }
-  .rf-diff-btn.active-easy   { background: #dcfce7; border-color: #22c55e; color: #16a34a; }
-  .rf-diff-btn.active-medium { background: #fef9c3; border-color: #eab308; color: #a16207; }
-  .rf-diff-btn.active-hard   { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
+  /* ── Zorluk seçici (kart) ── */
+  .rf-diff-group { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  @media (max-width: 520px) { .rf-diff-group { grid-template-columns: 1fr; } }
+
+  .rf-diff-card { position: relative; border: 2px solid #e2e8f0; border-radius: 14px;
+                  padding: 16px 14px; cursor: pointer; background: white; text-align: left;
+                  transition: border-color .2s, box-shadow .2s, background .2s;
+                  display: flex; flex-direction: column; gap: 6px; }
+  .rf-diff-card:hover { border-color: #a0aec0; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+
+  .rf-diff-card.sel-easy   { border-color: #22c55e; background: #f0fdf4; box-shadow: 0 0 0 3px rgba(34,197,94,.12); }
+  .rf-diff-card.sel-medium { border-color: #eab308; background: #fefce8; box-shadow: 0 0 0 3px rgba(234,179,8,.12); }
+  .rf-diff-card.sel-hard   { border-color: #ef4444; background: #fff1f2; box-shadow: 0 0 0 3px rgba(239,68,68,.12); }
+
+  .rf-diff-badge { width: 38px; height: 38px; border-radius: 10px; display: flex;
+                   align-items: center; justify-content: center; font-size: 18px;
+                   margin-bottom: 4px; transition: background .2s; }
+  .rf-diff-badge-easy   { background: #dcfce7; color: #16a34a; }
+  .rf-diff-badge-medium { background: #fef9c3; color: #a16207; }
+  .rf-diff-badge-hard   { background: #fee2e2; color: #dc2626; }
+
+  .rf-diff-title { font-size: 14px; font-weight: 800; color: var(--text-main); }
+  .rf-diff-desc  { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+  .rf-diff-check { position: absolute; top: 10px; right: 10px; width: 20px; height: 20px;
+                   border-radius: 50%; border: 2px solid #e2e8f0; background: white;
+                   display: flex; align-items: center; justify-content: center;
+                   transition: all .2s; }
+  .rf-diff-card.sel-easy   .rf-diff-check { border-color: #22c55e; background: #22c55e; }
+  .rf-diff-card.sel-medium .rf-diff-check { border-color: #eab308; background: #eab308; }
+  .rf-diff-card.sel-hard   .rf-diff-check { border-color: #ef4444; background: #ef4444; }
+  .rf-diff-check i { font-size: 10px; color: white; display: none; }
+  .rf-diff-card[class*="sel-"] .rf-diff-check i { display: block; }
 
   /* ── Karakter sayacı ── */
   .rf-counter { font-size: 11px; color: #a0aec0; text-align: right; margin-top: 4px; }
@@ -285,15 +309,24 @@
       <div class="rf-field" style="margin-bottom:16px;">
         <label class="rf-label">{{ form.difficulty.label }} <span class="req">*</span></label>
         <input type="hidden" name="difficulty" id="difficulty-hidden" value="{{ form.difficulty.value|default:'' }}">
-        <div class="rf-difficulty-group" id="diff-group">
-          <button type="button" class="rf-diff-btn" data-val="Kolay" onclick="setDifficulty(this)">
-            <i class="fa-solid fa-seedling" style="margin-right:5px;"></i>Kolay
+        <div class="rf-diff-group" id="diff-group">
+          <button type="button" class="rf-diff-card" data-val="Kolay" data-sel="sel-easy" onclick="setDifficulty(this)">
+            <div class="rf-diff-check"><i class="fa-solid fa-check"></i></div>
+            <div class="rf-diff-badge rf-diff-badge-easy"><i class="fa-solid fa-seedling"></i></div>
+            <div class="rf-diff-title">Kolay</div>
+            <div class="rf-diff-desc">Temel malzemeler, kısa süre</div>
           </button>
-          <button type="button" class="rf-diff-btn" data-val="Orta" onclick="setDifficulty(this)">
-            <i class="fa-solid fa-fire-flame-simple" style="margin-right:5px;"></i>Orta
+          <button type="button" class="rf-diff-card" data-val="Orta" data-sel="sel-medium" onclick="setDifficulty(this)">
+            <div class="rf-diff-check"><i class="fa-solid fa-check"></i></div>
+            <div class="rf-diff-badge rf-diff-badge-medium"><i class="fa-solid fa-fire-flame-simple"></i></div>
+            <div class="rf-diff-title">Orta</div>
+            <div class="rf-diff-desc">Biraz deneyim gerektirir</div>
           </button>
-          <button type="button" class="rf-diff-btn" data-val="Zor" onclick="setDifficulty(this)">
-            <i class="fa-solid fa-fire" style="margin-right:5px;"></i>Zor
+          <button type="button" class="rf-diff-card" data-val="Zor" data-sel="sel-hard" onclick="setDifficulty(this)">
+            <div class="rf-diff-check"><i class="fa-solid fa-check"></i></div>
+            <div class="rf-diff-badge rf-diff-badge-hard"><i class="fa-solid fa-fire"></i></div>
+            <div class="rf-diff-title">Zor</div>
+            <div class="rf-diff-desc">İleri teknik ve sabır ister</div>
           </button>
         </div>
         {% if form.difficulty.errors %}<span class="rf-error">{{ form.difficulty.errors.0 }}</span>{% endif %}
@@ -511,19 +544,18 @@ function toggleUrlBox() {
 }
 
 /* ─── Zorluk seçici ─── */
-const diffMap = { 'Kolay': 'active-easy', 'Orta': 'active-medium', 'Zor': 'active-hard' };
 function setDifficulty(btn) {
-  document.querySelectorAll('.rf-diff-btn').forEach(b => {
-    b.classList.remove('active-easy', 'active-medium', 'active-hard');
-  });
-  btn.classList.add(diffMap[btn.dataset.val]);
+  document.querySelectorAll('.rf-diff-card').forEach(b =>
+    b.classList.remove('sel-easy', 'sel-medium', 'sel-hard')
+  );
+  btn.classList.add(btn.dataset.sel);
   document.getElementById('difficulty-hidden').value = btn.dataset.val;
 }
 (function initDifficulty() {
   const val = document.getElementById('difficulty-hidden').value;
   if (!val) return;
-  const btn = [...document.querySelectorAll('.rf-diff-btn')].find(b => b.dataset.val === val);
-  if (btn) btn.classList.add(diffMap[val]);
+  const btn = [...document.querySelectorAll('.rf-diff-card')].find(b => b.dataset.val === val);
+  if (btn) btn.classList.add(btn.dataset.sel);
 })();
 
 /* ─── Karakter sayacı ─── */
