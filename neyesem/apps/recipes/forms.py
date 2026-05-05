@@ -19,7 +19,8 @@ class RecipeForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Örn: Fırın Sütlaç'}),
             'prep_time': forms.TextInput(attrs={'placeholder': 'Örn: 45 dk'}),
-            'difficulty': forms.TextInput(attrs={'placeholder': 'Örn: Orta'}),
+            # Template pill butonlarıyla yönetildiği için hidden; sunucu tarafında choices doğrulaması aktif
+            'difficulty': forms.HiddenInput(),
             'servings': forms.TextInput(attrs={'placeholder': 'Örn: 4-6 Kişilik'}),
             'description': forms.Textarea(attrs={
                 'placeholder': 'Tarifinizin püf noktalarını kısaca anlatın...',

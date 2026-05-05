@@ -15,9 +15,18 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    class Difficulty(models.TextChoices):
+        EASY   = 'Kolay', 'Kolay'
+        MEDIUM = 'Orta',  'Orta'
+        HARD   = 'Zor',   'Zor'
+
     title = models.CharField(max_length=200, verbose_name="Tarif Adı")
     prep_time = models.CharField(max_length=50, verbose_name="Hazırlanma Süresi")
-    difficulty = models.CharField(max_length=50, verbose_name="Zorluk Derecesi")
+    difficulty = models.CharField(
+        max_length=10,
+        choices=Difficulty.choices,
+        verbose_name="Zorluk Derecesi",
+    )
     description = models.TextField(verbose_name="Kısa Açıklama")
     ingredient_list = models.ManyToManyField(
         Ingredient,
