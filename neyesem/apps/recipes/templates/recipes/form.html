@@ -3,81 +3,601 @@
 {% block title %}{% if object %}Tarifi Düzenle{% else %}Yeni Tarif Ekle{% endif %} - Ne Yesem{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: var(--shadow-md);">
-    <h2 style="font-size: 28px; font-weight: 800; margin-bottom: 30px; color: var(--text-main);">
-        <i class="fa-solid fa-pen-to-square" style="color: var(--primary); margin-right: 10px;"></i>
-        {% if object %}Tarifi Düzenle: {{ object.title }}{% else %}Yeni Tarif Ekle{% endif %}
-    </h2>
+<style>
+  /* ── Genel ── */
+  .rf-wrap { max-width: 860px; margin: 0 auto; padding-bottom: 100px; }
 
-    <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
-        {% csrf_token %}
+  .rf-header { text-align: center; margin-bottom: 40px; }
+  .rf-header h1 { font-size: 32px; font-weight: 800; color: var(--text-main); }
+  .rf-header p  { font-size: 15px; color: var(--text-muted); margin-top: 6px; }
 
-        {% for field in form %}
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <label for="{{ field.id_for_label }}" style="font-weight: 600; font-size: 14px; color: #4a5568;">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                <div style="color: #e53e3e; font-size: 12px; margin-top: 4px;">{{ field.errors }}</div>
-                {% endif %}
-            </div>
-        {% endfor %}
+  /* ── Adım göstergesi ── */
+  .rf-steps { display: flex; justify-content: center; align-items: center; gap: 0; margin-bottom: 40px; }
+  .rf-step  { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #a0aec0; }
+  .rf-step.done   { color: #22c55e; }
+  .rf-step.active { color: var(--primary); }
+  .rf-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid currentColor;
+                 display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .rf-step-line { width: 40px; height: 2px; background: #e2e8f0; margin: 0 4px; }
 
-        <div style="margin-top: 10px; padding: 20px; background: #fff8f6; border: 1px solid #ffedd5; border-radius: 12px;">
-            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 15px; color: var(--text-main);">
-                <i class="fa-solid fa-basket-shopping" style="color: var(--primary);"></i> Malzemeler
-            </h3>
+  /* ── Kart bölümleri ── */
+  .rf-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+             border: 1px solid #f1f5f9; padding: 32px; margin-bottom: 20px; }
+  .rf-card-title { font-size: 16px; font-weight: 700; color: var(--text-main);
+                   display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .rf-card-title i { color: var(--primary); font-size: 18px; }
 
-            <div id="ingredients-container" style="display: flex; flex-direction: column; gap: 10px;">
-                {% if object %}
-                    {% for ri in object.recipe_ingredients.all %}
-                    <div class="ingredient-row" style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" name="ingredient_name[]" value="{{ ri.ingredient.name }}" placeholder="Malzeme Adı (Örn: Patates)" style="flex: 2; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;" required>
-                        <input type="text" name="ingredient_quantity[]" value="{{ ri.quantity_text|default:'' }}" placeholder="Miktar (Örn: 3 adet)" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                        <button type="button" onclick="removeRow(this)" style="background: #fee2e2; color: #ef4444; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="ingredient-row" style="display: flex; gap: 10px; align-items: center;">
-                        <input type="text" name="ingredient_name[]" placeholder="Malzeme Adı (Örn: Patates)" style="flex: 2; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;" required>
-                        <input type="text" name="ingredient_quantity[]" placeholder="Miktar (Örn: 3 adet)" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                        <button type="button" onclick="removeRow(this)" style="background: #fee2e2; color: #ef4444; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                {% endif %}
-            </div>
+  /* ── Kapak fotoğrafı ── */
+  .rf-cover-zone { position: relative; width: 100%; height: 240px; border-radius: 12px;
+                   border: 2px dashed #cbd5e1; background: #f8fafc; cursor: pointer;
+                   overflow: hidden; transition: border-color .2s, background .2s;
+                   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+  .rf-cover-zone:hover { border-color: var(--primary); background: #fff8f6; }
+  .rf-cover-zone.has-image { border-style: solid; border-color: transparent; }
+  .rf-cover-preview { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  .rf-cover-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+                      display: none; align-items: center; justify-content: center; border-radius: 10px; }
+  .rf-cover-zone.has-image .rf-cover-overlay { display: flex; }
+  .rf-cover-hint { font-size: 14px; color: var(--text-muted); text-align: center; line-height: 1.6; }
+  #id_image { display: none; }
 
-            <button type="button" onclick="addIngredientRow()" class="btn" style="margin-top: 15px; background: white; color: var(--primary); border: 2px solid var(--primary); box-shadow: none; padding: 8px 16px;">
-                <i class="fa-solid fa-plus"></i> Yeni Malzeme Ekle
+  .rf-url-toggle { font-size: 13px; color: var(--primary); font-weight: 600; cursor: pointer;
+                   background: none; border: none; padding: 0; margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+  .rf-url-box { margin-top: 12px; display: none; }
+  .rf-url-box.open { display: block; }
+
+  /* ── Input stilleri ── */
+  .rf-field { display: flex; flex-direction: column; gap: 6px; }
+  .rf-label { font-size: 13px; font-weight: 600; color: #4a5568; }
+  .rf-label span.req { color: var(--primary); margin-left: 2px; }
+  .rf-input { width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+              font-size: 14px; background: #f9fafb; transition: border-color .2s, box-shadow .2s, background .2s; }
+  .rf-input:focus { outline: none; border-color: var(--primary); background: white;
+                    box-shadow: 0 0 0 3px rgba(255,69,0,0.08); }
+  .rf-input.error { border-color: #ef4444; }
+  .rf-error { font-size: 12px; color: #ef4444; }
+  .rf-textarea { resize: vertical; min-height: 90px; }
+
+  /* ── Grid ── */
+  .rf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .rf-grid-4 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .rf-grid-2, .rf-grid-4 { grid-template-columns: 1fr; } }
+
+  /* ── Zorluk seçici ── */
+  .rf-difficulty-group { display: flex; gap: 10px; flex-wrap: wrap; }
+  .rf-diff-btn { padding: 9px 20px; border-radius: 50px; border: 2px solid #e2e8f0;
+                 font-size: 13px; font-weight: 700; cursor: pointer; background: white;
+                 color: #718096; transition: all .2s; }
+  .rf-diff-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .rf-diff-btn.active-easy   { background: #dcfce7; border-color: #22c55e; color: #16a34a; }
+  .rf-diff-btn.active-medium { background: #fef9c3; border-color: #eab308; color: #a16207; }
+  .rf-diff-btn.active-hard   { background: #fee2e2; border-color: #ef4444; color: #dc2626; }
+
+  /* ── Karakter sayacı ── */
+  .rf-counter { font-size: 11px; color: #a0aec0; text-align: right; margin-top: 4px; }
+  .rf-counter.warn { color: #f59e0b; }
+
+  /* ── Malzeme satırları ── */
+  .rf-ing-row { display: grid; grid-template-columns: 32px 1fr 140px 36px;
+                gap: 10px; align-items: center; padding: 8px 0;
+                border-bottom: 1px solid #f1f5f9; }
+  .rf-ing-num { font-size: 13px; font-weight: 700; color: #a0aec0; text-align: center; }
+  .rf-del-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: #fef2f2;
+                color: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center;
+                font-size: 13px; transition: background .2s; flex-shrink: 0; }
+  .rf-del-btn:hover { background: #fee2e2; }
+  .rf-add-btn { display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 10px 18px;
+                border: 2px dashed #cbd5e1; border-radius: 10px; background: transparent;
+                color: var(--primary); font-size: 13px; font-weight: 700; cursor: pointer;
+                width: 100%; justify-content: center; transition: all .2s; }
+  .rf-add-btn:hover { border-color: var(--primary); background: #fff8f6; }
+
+  /* ── Adım satırları ── */
+  .rf-step-row { display: grid; grid-template-columns: 40px 1fr 36px;
+                 gap: 10px; align-items: flex-start; padding: 10px 0;
+                 border-bottom: 1px solid #f1f5f9; }
+  .rf-step-badge { width: 32px; height: 32px; border-radius: 50%; background: var(--primary);
+                   color: white; font-size: 13px; font-weight: 800;
+                   display: flex; align-items: center; justify-content: center;
+                   flex-shrink: 0; margin-top: 4px; }
+  .rf-step-input { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+                   font-size: 14px; background: #f9fafb; resize: vertical; min-height: 64px;
+                   font-family: inherit; transition: border-color .2s, background .2s; }
+  .rf-step-input:focus { outline: none; border-color: var(--primary); background: white;
+                         box-shadow: 0 0 0 3px rgba(255,69,0,0.08); }
+
+  /* ── Sticky alt bar ── */
+  .rf-sticky { position: fixed; bottom: 0; left: 0; right: 0; background: white;
+               border-top: 1px solid #edf2f7; padding: 16px 5%;
+               display: flex; justify-content: flex-end; align-items: center; gap: 12px;
+               box-shadow: 0 -4px 20px rgba(0,0,0,0.06); z-index: 100; }
+  .rf-cancel-btn { padding: 12px 28px; border-radius: 50px; background: #f1f5f9;
+                   color: #4a5568; font-weight: 600; font-size: 14px; text-decoration: none;
+                   border: none; cursor: pointer; transition: background .2s; }
+  .rf-cancel-btn:hover { background: #e2e8f0; }
+  .rf-save-btn { padding: 12px 32px; border-radius: 50px; background: var(--primary);
+                 color: white; font-weight: 700; font-size: 15px; border: none; cursor: pointer;
+                 box-shadow: 0 4px 12px rgba(255,69,0,0.3); transition: all .2s;
+                 display: flex; align-items: center; gap: 8px; }
+  .rf-save-btn:hover { background: var(--primary-hover); transform: translateY(-1px);
+                       box-shadow: 0 6px 16px rgba(255,69,0,0.4); }
+
+  /* ── Giriş animasyonu ── */
+  .rf-card { animation: fadeUp .3s ease both; }
+  .rf-card:nth-child(2) { animation-delay: .05s; }
+  .rf-card:nth-child(3) { animation-delay: .10s; }
+  .rf-card:nth-child(4) { animation-delay: .15s; }
+  .rf-card:nth-child(5) { animation-delay: .20s; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .rf-ing-row, .rf-step-row { animation: fadeIn .2s ease both; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+
+<div class="rf-wrap">
+
+  <!-- Başlık -->
+  <div class="rf-header">
+    <h1>
+      {% if object %}
+        <i class="fa-solid fa-pen-to-square" style="color:var(--primary);"></i> Tarifi Düzenle
+      {% else %}
+        <i class="fa-solid fa-bowl-food" style="color:var(--primary);"></i> Yeni Tarif Ekle
+      {% endif %}
+    </h1>
+    <p>{% if object %}Tarifinizi güncelleyebilirsiniz.{% else %}Harika tarifinizi toplulukla paylaşın!{% endif %}</p>
+  </div>
+
+  <!-- Adım göstergesi -->
+  <div class="rf-steps">
+    <div class="rf-step active">
+      <div class="rf-step-dot">1</div> Temel Bilgi
+    </div>
+    <div class="rf-step-line"></div>
+    <div class="rf-step active">
+      <div class="rf-step-dot">2</div> Malzemeler
+    </div>
+    <div class="rf-step-line"></div>
+    <div class="rf-step active">
+      <div class="rf-step-dot">3</div> Hazırlanış
+    </div>
+  </div>
+
+  <form id="recipe-form" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Hata kutusu (genel) -->
+    {% if form.non_field_errors %}
+    <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:16px 20px; margin-bottom:20px; color:#dc2626; font-size:14px; font-weight:500;">
+      <i class="fa-solid fa-circle-exclamation" style="margin-right:8px;"></i>
+      {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ━━━━━━━━━━━━━ BÖLÜM 1 — Kapak Fotoğrafı ━━━━━━━━━━━━━ -->
+    <div class="rf-card">
+      <div class="rf-card-title">
+        <i class="fa-solid fa-image"></i> Kapak Fotoğrafı
+        <span style="font-size:12px; font-weight:500; color:var(--text-muted); margin-left:auto;">İsteğe bağlı</span>
+      </div>
+
+      <!-- Yükleme alanı -->
+      <div class="rf-cover-zone {% if object and object.image %}has-image{% endif %}" id="cover-zone" onclick="triggerFileInput()">
+        {% if object and object.image %}
+          <img id="cover-preview" class="rf-cover-preview" src="{{ object.image.url }}" style="display:block;">
+        {% elif object and object.image_url %}
+          <img id="cover-preview" class="rf-cover-preview" src="{{ object.image_url }}" style="display:block;">
+        {% else %}
+          <img id="cover-preview" class="rf-cover-preview" src="">
+        {% endif %}
+
+        <div class="rf-cover-overlay">
+          <span style="color:white; font-size:14px; font-weight:600; text-align:center; padding:0 20px;">
+            <i class="fa-solid fa-pen" style="margin-right:8px;"></i>Fotoğrafı Değiştir
+          </span>
+        </div>
+
+        <div id="cover-placeholder" {% if object and object.image or object and object.image_url %}style="display:none;"{% endif %}>
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size:40px; color:#cbd5e1;"></i>
+          <div class="rf-cover-hint">
+            <strong style="color:var(--text-main);">Fotoğraf yüklemek için tıklayın</strong><br>
+            PNG, JPG — Maks. 5 MB
+          </div>
+        </div>
+      </div>
+
+      {{ form.image }}
+
+      <!-- URL alternatifi -->
+      <button type="button" class="rf-url-toggle" id="url-toggle-btn" onclick="toggleUrlBox()">
+        <i class="fa-solid fa-link"></i>
+        Fotoğraf URL'si ile ekle
+        <i class="fa-solid fa-chevron-down" id="url-chevron" style="font-size:10px;"></i>
+      </button>
+
+      <div class="rf-url-box {% if object and object.image_url %}open{% endif %}" id="url-box">
+        <div class="rf-field">
+          <label class="rf-label" for="{{ form.image_url.id_for_label }}">{{ form.image_url.label }}</label>
+          <input type="url" name="image_url" id="{{ form.image_url.id_for_label }}"
+                 value="{{ form.image_url.value|default:'' }}"
+                 placeholder="https://ornek.com/foto.jpg"
+                 class="rf-input {% if form.image_url.errors %}error{% endif %}"
+                 oninput="previewFromUrl(this.value)">
+          {% if form.image_url.errors %}<span class="rf-error">{{ form.image_url.errors.0 }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━ BÖLÜM 2 — Temel Bilgiler ━━━━━━━━━━━━━ -->
+    <div class="rf-card">
+      <div class="rf-card-title">
+        <i class="fa-solid fa-circle-info"></i> Temel Bilgiler
+      </div>
+
+      <!-- Tarif adı (tam genişlik) -->
+      <div class="rf-field" style="margin-bottom:16px;">
+        <label class="rf-label" for="{{ form.title.id_for_label }}">
+          {{ form.title.label }} <span class="req">*</span>
+        </label>
+        <input type="text" name="title" id="{{ form.title.id_for_label }}"
+               value="{{ form.title.value|default:'' }}"
+               placeholder="Örn: Fırın Sütlaç, Izgara Tavuk..."
+               class="rf-input {% if form.title.errors %}error{% endif %}"
+               style="font-size:16px; font-weight:600;"
+               maxlength="200" required>
+        {% if form.title.errors %}<span class="rf-error">{{ form.title.errors.0 }}</span>{% endif %}
+      </div>
+
+      <!-- Zorluk -->
+      <div class="rf-field" style="margin-bottom:16px;">
+        <label class="rf-label">{{ form.difficulty.label }} <span class="req">*</span></label>
+        <input type="hidden" name="difficulty" id="difficulty-hidden" value="{{ form.difficulty.value|default:'' }}">
+        <div class="rf-difficulty-group" id="diff-group">
+          <button type="button" class="rf-diff-btn" data-val="Kolay" onclick="setDifficulty(this)">
+            <i class="fa-solid fa-seedling" style="margin-right:5px;"></i>Kolay
+          </button>
+          <button type="button" class="rf-diff-btn" data-val="Orta" onclick="setDifficulty(this)">
+            <i class="fa-solid fa-fire-flame-simple" style="margin-right:5px;"></i>Orta
+          </button>
+          <button type="button" class="rf-diff-btn" data-val="Zor" onclick="setDifficulty(this)">
+            <i class="fa-solid fa-fire" style="margin-right:5px;"></i>Zor
+          </button>
+        </div>
+        {% if form.difficulty.errors %}<span class="rf-error">{{ form.difficulty.errors.0 }}</span>{% endif %}
+      </div>
+
+      <!-- Süre ve Porsiyon -->
+      <div class="rf-grid-2">
+        <div class="rf-field">
+          <label class="rf-label" for="{{ form.prep_time.id_for_label }}">
+            {{ form.prep_time.label }} <span class="req">*</span>
+          </label>
+          <div style="position:relative;">
+            <i class="fa-regular fa-clock" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#a0aec0;"></i>
+            <input type="text" name="prep_time" id="{{ form.prep_time.id_for_label }}"
+                   value="{{ form.prep_time.value|default:'' }}"
+                   placeholder="Örn: 45 dk"
+                   class="rf-input {% if form.prep_time.errors %}error{% endif %}"
+                   style="padding-left:36px;" required>
+          </div>
+          {% if form.prep_time.errors %}<span class="rf-error">{{ form.prep_time.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="rf-field">
+          <label class="rf-label" for="{{ form.servings.id_for_label }}">{{ form.servings.label }}</label>
+          <div style="position:relative;">
+            <i class="fa-solid fa-users" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#a0aec0;"></i>
+            <input type="text" name="servings" id="{{ form.servings.id_for_label }}"
+                   value="{{ form.servings.value|default:'' }}"
+                   placeholder="Örn: 4-6 Kişilik"
+                   class="rf-input {% if form.servings.errors %}error{% endif %}"
+                   style="padding-left:36px;">
+          </div>
+          {% if form.servings.errors %}<span class="rf-error">{{ form.servings.errors.0 }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━ BÖLÜM 3 — Açıklama ━━━━━━━━━━━━━ -->
+    <div class="rf-card">
+      <div class="rf-card-title">
+        <i class="fa-solid fa-align-left"></i> Kısa Açıklama
+      </div>
+      <div class="rf-field">
+        <label class="rf-label" for="{{ form.description.id_for_label }}">
+          {{ form.description.label }} <span class="req">*</span>
+        </label>
+        <textarea name="description" id="{{ form.description.id_for_label }}"
+                  placeholder="Tarifinizin püf noktalarını, lezzetini veya hikayesini kısaca anlatın..."
+                  class="rf-input rf-textarea {% if form.description.errors %}error{% endif %}"
+                  maxlength="500" rows="3"
+                  oninput="updateCounter(this, 'desc-counter', 500)" required>{{ form.description.value|default:'' }}</textarea>
+        <div id="desc-counter" class="rf-counter">0 / 500</div>
+        {% if form.description.errors %}<span class="rf-error">{{ form.description.errors.0 }}</span>{% endif %}
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━ BÖLÜM 4 — Malzemeler ━━━━━━━━━━━━━ -->
+    <div class="rf-card">
+      <div class="rf-card-title">
+        <i class="fa-solid fa-basket-shopping"></i> Malzemeler
+        <span id="ing-count" style="margin-left:auto; font-size:12px; color:var(--text-muted); font-weight:500;"></span>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 32px 1fr 140px 36px; gap:10px; padding-bottom:10px; border-bottom:2px solid #f1f5f9; margin-bottom:4px;">
+        <div></div>
+        <div style="font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:.5px;">Malzeme Adı</div>
+        <div style="font-size:11px; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:.5px;">Miktar</div>
+        <div></div>
+      </div>
+
+      <div id="ingredients-container">
+        {% if object %}
+          {% for ri in object.recipe_ingredients.all %}
+          <div class="rf-ing-row">
+            <div class="rf-ing-num">{{ forloop.counter }}</div>
+            <input type="text" name="ingredient_name[]" value="{{ ri.ingredient.name }}"
+                   placeholder="Örn: Un, Yumurta..." class="rf-input" required>
+            <input type="text" name="ingredient_quantity[]" value="{{ ri.quantity_text|default:'' }}"
+                   placeholder="Örn: 2 yemek k." class="rf-input">
+            <button type="button" class="rf-del-btn" onclick="removeRow(this, 'ingredients-container', renumberIngredients)" title="Sil">
+              <i class="fa-solid fa-trash"></i>
             </button>
-        </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="rf-ing-row">
+            <div class="rf-ing-num">1</div>
+            <input type="text" name="ingredient_name[]" placeholder="Örn: Un, Yumurta..." class="rf-input" required>
+            <input type="text" name="ingredient_quantity[]" placeholder="Örn: 2 yemek k." class="rf-input">
+            <button type="button" class="rf-del-btn" onclick="removeRow(this, 'ingredients-container', renumberIngredients)" title="Sil">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        {% endif %}
+      </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
-            <a href="{% url 'users:account_my_recipes' %}" class="btn" style="background: #e2e8f0; color: #4a5568; box-shadow: none;">İptal</a>
-            <button type="submit" class="btn" style="padding: 12px 30px; font-size: 16px;"><i class="fa-solid fa-check"></i> Kaydet</button>
-        </div>
-    </form>
+      <button type="button" class="rf-add-btn" onclick="addIngredientRow()">
+        <i class="fa-solid fa-plus"></i> Malzeme Ekle
+      </button>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━ BÖLÜM 5 — Hazırlanış ━━━━━━━━━━━━━ -->
+    <div class="rf-card">
+      <div class="rf-card-title">
+        <i class="fa-solid fa-list-ol"></i> Adım Adım Hazırlanış
+        <span id="step-count" style="margin-left:auto; font-size:12px; color:var(--text-muted); font-weight:500;"></span>
+      </div>
+
+      <!-- Gizli textarea — form submit sırasında adımlar buraya toplanır -->
+      <textarea name="instructions" id="instructions-hidden" style="display:none;">{{ form.instructions.value|default:'' }}</textarea>
+
+      <div id="steps-container">
+        {% if object and object.instructions %}
+          {% for step in object.instructions.splitlines %}
+            {% if step.strip %}
+            <div class="rf-step-row">
+              <div class="rf-step-badge">{{ forloop.counter }}</div>
+              <textarea class="rf-step-input step-input" rows="2"
+                        placeholder="Bu adımda yapılacakları açıklayın...">{{ step }}</textarea>
+              <button type="button" class="rf-del-btn" onclick="removeRow(this, 'steps-container', renumberSteps)" title="Adımı sil">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <div class="rf-step-row">
+            <div class="rf-step-badge">1</div>
+            <textarea class="rf-step-input step-input" rows="2"
+                      placeholder="İlk adımda yapılacakları açıklayın..."></textarea>
+            <button type="button" class="rf-del-btn" onclick="removeRow(this, 'steps-container', renumberSteps)" title="Adımı sil">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+
+      <button type="button" class="rf-add-btn" onclick="addStepRow()">
+        <i class="fa-solid fa-plus"></i> Adım Ekle
+      </button>
+
+      <p style="margin-top:16px; font-size:12px; color:#a0aec0; display:flex; align-items:center; gap:6px;">
+        <i class="fa-solid fa-circle-info"></i>
+        Her adım ayrı bir kutuya girilir. İpucu ve püf noktalarını ayrı adım olarak ekleyebilirsiniz.
+      </p>
+    </div>
+
+  </form>
+
+  <!-- Hata özeti (alanlar için) -->
+  {% if form.errors %}
+  <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:12px; padding:16px 20px; margin-top:8px; color:#dc2626; font-size:13px;">
+    <strong><i class="fa-solid fa-triangle-exclamation" style="margin-right:6px;"></i>Lütfen eksik alanları doldurun:</strong>
+    <ul style="margin:8px 0 0 20px;">
+      {% for field, errors in form.errors.items %}
+        {% if field != '__all__' %}
+        <li>{{ field }}: {{ errors.0 }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- ─── Sticky Alt Buton Barı ─── -->
+<div class="rf-sticky">
+  <a href="{% url 'users:account_my_recipes' %}" class="rf-cancel-btn">
+    <i class="fa-solid fa-xmark" style="margin-right:6px;"></i>İptal
+  </a>
+  <button type="button" class="rf-save-btn" onclick="submitRecipeForm()">
+    <i class="fa-solid fa-floppy-disk"></i>
+    {% if object %}Tarifinizi Güncelle{% else %}Tarifi Yayınla{% endif %}
+  </button>
 </div>
 
 <script>
-function addIngredientRow() {
-    const container = document.getElementById('ingredients-container');
-    const row = document.createElement('div');
-    row.className = 'ingredient-row';
-    row.style.cssText = 'display: flex; gap: 10px; align-items: center; margin-top: 5px;';
-    row.innerHTML = `
-        <input type="text" name="ingredient_name[]" placeholder="Malzeme Adı (Örn: Patates)" style="flex: 2; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;" required>
-        <input type="text" name="ingredient_quantity[]" placeholder="Miktar (Örn: 3 adet)" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-        <button type="button" onclick="removeRow(this)" style="background: #fee2e2; color: #ef4444; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
-    `;
-    container.appendChild(row);
+/* ─── Fotoğraf önizleme ─── */
+function triggerFileInput() {
+  document.getElementById('id_image').click();
+}
+document.getElementById('id_image').addEventListener('change', function() {
+  if (!this.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => showCoverPreview(e.target.result);
+  reader.readAsDataURL(this.files[0]);
+});
+function previewFromUrl(url) {
+  if (url.startsWith('http')) showCoverPreview(url);
+}
+function showCoverPreview(src) {
+  const zone = document.getElementById('cover-zone');
+  const img  = document.getElementById('cover-preview');
+  const hint = document.getElementById('cover-placeholder');
+  img.src = src;
+  img.style.display = 'block';
+  hint.style.display = 'none';
+  zone.classList.add('has-image');
 }
 
-function removeRow(btn) {
-    const container = document.getElementById('ingredients-container');
-    if (container.children.length > 1) {
-        btn.parentElement.remove();
-    } else {
-        alert('En az bir malzeme eklemelisiniz.');
-    }
+/* ─── URL kutusu aç/kapat ─── */
+function toggleUrlBox() {
+  const box     = document.getElementById('url-box');
+  const chevron = document.getElementById('url-chevron');
+  const open    = box.classList.toggle('open');
+  chevron.style.transform = open ? 'rotate(180deg)' : '';
 }
+
+/* ─── Zorluk seçici ─── */
+const diffMap = { 'Kolay': 'active-easy', 'Orta': 'active-medium', 'Zor': 'active-hard' };
+function setDifficulty(btn) {
+  document.querySelectorAll('.rf-diff-btn').forEach(b => {
+    b.classList.remove('active-easy', 'active-medium', 'active-hard');
+  });
+  btn.classList.add(diffMap[btn.dataset.val]);
+  document.getElementById('difficulty-hidden').value = btn.dataset.val;
+}
+(function initDifficulty() {
+  const val = document.getElementById('difficulty-hidden').value;
+  if (!val) return;
+  const btn = [...document.querySelectorAll('.rf-diff-btn')].find(b => b.dataset.val === val);
+  if (btn) btn.classList.add(diffMap[val]);
+})();
+
+/* ─── Karakter sayacı ─── */
+function updateCounter(el, counterId, max) {
+  const c   = document.getElementById(counterId);
+  const len = el.value.length;
+  c.textContent = `${len} / ${max}`;
+  c.classList.toggle('warn', len > max * 0.85);
+}
+(function initCounters() {
+  const desc = document.getElementById('{{ form.description.id_for_label }}');
+  if (desc && desc.value) updateCounter(desc, 'desc-counter', 500);
+})();
+
+/* ─── Malzeme satırları ─── */
+function renumberIngredients() {
+  document.querySelectorAll('#ingredients-container .rf-ing-num').forEach((el, i) => {
+    el.textContent = i + 1;
+  });
+  const cnt = document.querySelectorAll('#ingredients-container .rf-ing-row').length;
+  document.getElementById('ing-count').textContent = cnt + ' malzeme';
+}
+function addIngredientRow() {
+  const cont = document.getElementById('ingredients-container');
+  const num  = cont.querySelectorAll('.rf-ing-row').length + 1;
+  const row  = document.createElement('div');
+  row.className = 'rf-ing-row';
+  row.innerHTML = `
+    <div class="rf-ing-num">${num}</div>
+    <input type="text" name="ingredient_name[]" placeholder="Örn: Un, Yumurta..." class="rf-input" required>
+    <input type="text" name="ingredient_quantity[]" placeholder="Örn: 2 yemek k." class="rf-input">
+    <button type="button" class="rf-del-btn" onclick="removeRow(this,'ingredients-container',renumberIngredients)" title="Sil">
+      <i class="fa-solid fa-trash"></i>
+    </button>`;
+  cont.appendChild(row);
+  renumberIngredients();
+  row.querySelector('input').focus();
+}
+renumberIngredients();
+
+/* ─── Adım satırları ─── */
+function renumberSteps() {
+  document.querySelectorAll('#steps-container .rf-step-badge').forEach((el, i) => {
+    el.textContent = i + 1;
+  });
+  const cnt = document.querySelectorAll('#steps-container .rf-step-row').length;
+  document.getElementById('step-count').textContent = cnt + ' adım';
+}
+function addStepRow() {
+  const cont = document.getElementById('steps-container');
+  const num  = cont.querySelectorAll('.rf-step-row').length + 1;
+  const row  = document.createElement('div');
+  row.className = 'rf-step-row';
+  row.innerHTML = `
+    <div class="rf-step-badge">${num}</div>
+    <textarea class="rf-step-input step-input" rows="2" placeholder="Bu adımda yapılacakları açıklayın..."></textarea>
+    <button type="button" class="rf-del-btn" onclick="removeRow(this,'steps-container',renumberSteps)" title="Adımı sil">
+      <i class="fa-solid fa-trash"></i>
+    </button>`;
+  cont.appendChild(row);
+  renumberSteps();
+  row.querySelector('textarea').focus();
+}
+renumberSteps();
+
+/* ─── Satır silme (genel) ─── */
+function removeRow(btn, containerId, renumber) {
+  const cont = document.getElementById(containerId);
+  if (cont.querySelectorAll(containerId === 'ingredients-container' ? '.rf-ing-row' : '.rf-step-row').length <= 1) {
+    showToast(containerId === 'ingredients-container' ? 'En az bir malzeme gerekli.' : 'En az bir adım gerekli.');
+    return;
+  }
+  btn.closest(containerId === 'ingredients-container' ? '.rf-ing-row' : '.rf-step-row').remove();
+  renumber();
+}
+
+/* ─── Form gönderimi ─── */
+function submitRecipeForm() {
+  // Adımları instructions hidden textarea'ya topla
+  const steps = [...document.querySelectorAll('.step-input')]
+    .map(t => t.value.trim())
+    .filter(Boolean)
+    .join('\n');
+  document.getElementById('instructions-hidden').value = steps;
+
+  // Zorluk kontrolü
+  if (!document.getElementById('difficulty-hidden').value) {
+    showToast('Lütfen zorluk derecesi seçin.');
+    document.getElementById('diff-group').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  document.getElementById('recipe-form').submit();
+}
+
+/* ─── Bildirim toast ─── */
+function showToast(msg) {
+  let t = document.getElementById('rf-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'rf-toast';
+    t.style.cssText = 'position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#1a202c; color:white; padding:12px 24px; border-radius:50px; font-size:14px; font-weight:600; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.2); transition:opacity .3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+/* ─── Enter ile yeni adım ekleme (textarea'da Ctrl+Enter) ─── */
+document.addEventListener('keydown', function(e) {
+  if (e.target.classList.contains('step-input') && e.key === 'Enter' && e.ctrlKey) {
+    e.preventDefault();
+    addStepRow();
+  }
+});
 </script>
 {% endblock %}
