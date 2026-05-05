@@ -49,6 +49,11 @@ class AccountProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'users/account/profile.html'
     login_url = 'users:login'
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            Profile.objects.get_or_create(user=request.user)
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['u_form'] = UserUpdateForm(instance=self.request.user)
@@ -89,6 +94,11 @@ class AccountFavoritesView(LoginRequiredMixin, ListView):
     template_name = 'users/account/favorites.html'
     context_object_name = 'favorites'
     login_url = 'users:login'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            Profile.objects.get_or_create(user=request.user)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         return (
