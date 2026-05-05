@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Tarif Sil - Ne Yesem{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 60px auto; background: white; padding: 40px; border-radius: 16px; box-shadow: var(--shadow-md); text-align: center;">
+    <div style="width: 80px; height: 80px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 40px; color: #ef4444;"></i>
+    </div>
+
+    <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 10px; color: var(--text-main);">Emin misiniz?</h2>
+
+    <p style="color: #4a5568; margin-bottom: 30px; line-height: 1.6;">
+        <strong>"{{ object.title }}"</strong> isimli tarifinizi tamamen silmek üzeresiniz. Bu işlem geri alınamaz.
+    </p>
+
+    <form method="POST" style="display: flex; justify-content: center; gap: 15px;">
+        {% csrf_token %}
+        <a href="{% url 'users:account_my_recipes' %}" class="btn" style="background: #e2e8f0; color: #4a5568; box-shadow: none;">İptal</a>
+        <button type="submit" class="btn" style="background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">Evet, Sil</button>
+    </form>
+</div>
+{% endblock %}

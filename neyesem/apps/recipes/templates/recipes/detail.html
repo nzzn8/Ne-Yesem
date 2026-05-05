@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ recipe.title }} - Ne Yesem{% endblock %}
+
+{% block content %}
+<div style="background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 50px;">
+    <div style="position: relative; width: 100%; height: 400px; background: url('{% if recipe.image %}{{ recipe.image.url }}{% elif recipe.image_url %}{% if "http" in recipe.image_url %}{{ recipe.image_url }}{% else %}{% static recipe.image_url %}{% endif %}{% else %}https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1920&q=80{% endif %}') center/cover no-repeat;">
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h1 style="color: white; font-size: 42px; font-weight: 800; margin-bottom: 10px;">{{ recipe.title }}</h1>
+                <p style="color: #e2e8f0; font-size: 16px; max-width: 800px; line-height: 1.6;">{{ recipe.description }}</p>
+            </div>
+
+            {% if user.is_authenticated %}
+            <button class="favorite-btn" data-id="{{ recipe.id }}" style="background: white; border: none; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s ease; flex-shrink: 0; margin-bottom: 10px;">
+                <i class="{% if is_favorited %}fa-solid{% else %}fa-regular{% endif %} fa-heart fav-icon" style="color: {% if is_favorited %}#e53e3e{% else %}#718096{% endif %}; font-size: 24px;"></i>
+            </button>
+            {% else %}
+            <a href="{% url 'users:login' %}?next={% url 'recipes:detail' recipe.id %}" style="background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; margin-bottom: 10px; text-decoration: none;">
+                <i class="fa-regular fa-heart" style="color: #718096; font-size: 24px;"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="display: flex; background: #fafafa; border-bottom: 1px solid #edf2f7; padding: 20px 40px; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
+        <div style="text-align: center;">
+            <i class="fa-regular fa-clock" style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Süre</span>
+            <div style="font-size: 16px; font-weight: 700;">{{ recipe.prep_time }}</div>
+        </div>
+        <div style="text-align: center;">
+            <i class="fa-solid fa-fire" style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Zorluk</span>
+            <div style="font-size: 16px; font-weight: 700;">{{ recipe.difficulty }}</div>
+        </div>
+        <div style="text-align: center;">
+            <i class="fa-solid fa-users" style="font-size: 24px; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Porsiyon</span>
+            <div style="font-size: 16px; font-weight: 700;">{{ recipe.servings|default:'Belirtilmemiş' }}</div>
+        </div>
+    </div>
+
+    <div style="padding: 40px; display: grid; grid-template-columns: 1fr 2fr; gap: 40px;">
+        <div style="background: #fff8f6; padding: 30px; border-radius: 16px; align-self: start; border: 1px solid #ffedd5;">
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: center;">
+                <i class="fa-solid fa-basket-shopping" style="color: var(--primary); margin-right: 10px;"></i> Malzemeler
+            </h3>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for ri in recipe.recipe_ingredients.all %}
+                    <li>
+                        <a href="{% url 'recipes:by_ingredient' ri.ingredient.name %}" style="display: inline-block; padding: 8px 16px; background: white; border: 1px solid var(--primary); color: var(--primary); border-radius: 50px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.3s ease;" onmouseover="this.style.background='var(--primary)'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='var(--primary)';">
+                            <i class="fa-solid fa-leaf" style="margin-right: 6px;"></i>
+                            {% if ri.quantity_text %}<span style="color: #4a5568; font-weight: 500; margin-right: 4px;">{{ ri.quantity_text }}</span>{% endif %}
+                            {{ ri.ingredient.name }}
+                        </a>
+                    </li>
+                {% empty %}
+                    <p style="color: #a0aec0; font-size: 14px;">Henüz malzeme eklenmemiş.</p>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div>
+            <h3 style="font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom: 25px; display: flex; align-items: center;">
+                <i class="fa-solid fa-list-check" style="color: var(--primary); margin-right: 10px;"></i> Adım Adım Hazırlanışı
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                {% for instruction in recipe.instructions.splitlines %}
+                    {% if instruction.strip %}
+                    <div style="display: flex; align-items: flex-start; background: #fafafa; padding: 20px; border-radius: 12px; border: 1px solid #edf2f7;">
+                        <div style="flex-shrink: 0; margin-right: 15px; color: var(--primary); margin-top: 4px;">
+                            <i class="fa-solid fa-circle-right" style="font-size: 18px;"></i>
+                        </div>
+                        <div style="font-size: 16px; color: #4a5568; line-height: 1.7;">{{ instruction }}</div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 768px) {
+    div[style*="grid-template-columns: 1fr 2fr"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const recipeId = this.dataset.id;
+            const icon = this.querySelector('.fav-icon');
+
+            fetch(`/tarif/${recipeId}/favori/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(data => {
+                if (data.is_favorited) {
+                    icon.classList.replace('fa-regular', 'fa-solid');
+                    icon.style.color = '#e53e3e';
+                } else {
+                    icon.classList.replace('fa-solid', 'fa-regular');
+                    icon.style.color = '#718096';
+                }
+            })
+            .catch(() => console.error('Favori işlemi başarısız.'));
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tarifler - Ne Yesem{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 50px; text-align: center; padding: 20px 0;">
+    <h2 style="font-size: 38px; font-weight: 800; color: #1a202c; margin-bottom: 15px; letter-spacing: -1px;">Pratik & Lezzetli Tarifler <i class="fa-solid fa-leaf" style="color: #FF4500;"></i></h2>
+    <p style="font-size: 18px; color: #718096; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+        Mutfağımızın kurtarıcı ve en çok tercih edilen tariflerini sizin için hazırladık.
+    </p>
+</div>
+
+<div style="max-width: 600px; margin: 0 auto 40px auto; text-align: center;">
+    <form method="GET" action="{% url 'recipes:list' %}" style="display: flex; gap: 10px;">
+        <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Tarif veya malzeme ara (örn: mantar, tavuk)..." style="flex: 1; padding: 15px 20px; border-radius: 50px; border: 2px solid #edf2f7; font-size: 16px; outline: none; transition: border-color 0.3s; background: white;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#edf2f7'">
+        <button type="submit" class="btn" style="padding: 15px 30px; font-size: 16px; border-radius: 50px;"><i class="fa-solid fa-magnifying-glass" style="margin-right: 8px;"></i> Ara</button>
+    </form>
+    {% if selected_ingredient %}
+        <div style="margin-top: 20px; display: inline-block; background: #fff0eb; padding: 10px 20px; border-radius: 50px; color: var(--primary); font-weight: 600; font-size: 15px; border: 1px solid #ffedd5;">
+            Filtre: <span style="color: #1a202c;">{{ selected_ingredient }}</span>
+            <a href="{% url 'recipes:list' %}" style="margin-left: 12px; color: #e53e3e; text-decoration: none;"><i class="fa-solid fa-xmark"></i></a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="card-container">
+    {% for recipe in recipes %}
+    <div class="card recipe-card" style="box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; position: relative;">
+        <a href="{% url 'recipes:detail' recipe.id %}" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 1;" aria-label="{{ recipe.title }} detaylarına git"></a>
+
+        {% if user.is_authenticated %}
+        <button class="favorite-btn" data-id="{{ recipe.id }}" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s ease; z-index: 10;">
+            <i class="{% if recipe.id in user_favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart fav-icon" style="color: {% if recipe.id in user_favorites %}#e53e3e{% else %}#718096{% endif %}; font-size: 20px;"></i>
+        </button>
+        {% else %}
+        <a href="{% url 'users:login' %}?next={% url 'recipes:list' %}" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; text-decoration: none;">
+            <i class="fa-regular fa-heart" style="color: #718096; font-size: 20px;"></i>
+        </a>
+        {% endif %}
+
+        {% if recipe.image %}
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="card-img">
+        {% elif recipe.image_url %}
+            {% if "http" in recipe.image_url %}
+            <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="card-img">
+            {% else %}
+            <img src="{% static recipe.image_url %}" alt="{{ recipe.title }}" class="card-img">
+            {% endif %}
+        {% else %}
+        <img src="https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=800&q=80" alt="Tarif Görseli Yok" class="card-img">
+        {% endif %}
+
+        <div class="card-content">
+            <h3>{{ recipe.title }}</h3>
+            <p>
+                <span style="display:inline-block; background:#edf2f7; padding:6px 12px; border-radius:8px; color:#4a5568; font-weight:600; margin-right:8px; font-size:12px;"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>{{ recipe.prep_time }}</span>
+                <span style="display:inline-block; background:rgba(255,69,0,0.1); padding:6px 12px; border-radius:8px; color:#FF4500; font-weight:600; font-size:12px;"><i class="fa-solid fa-star" style="margin-right:4px;"></i>{{ recipe.difficulty }}</span>
+            </p>
+            <p style="color:#4a5568; margin-top: 15px; flex-grow: 1; line-height:1.6;">{{ recipe.description|truncatewords:15 }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: var(--text-muted);">
+        <i class="fa-solid fa-bowl-food" style="font-size: 48px; margin-bottom: 20px; color: #a0aec0;"></i>
+        <p style="font-size: 18px; font-weight: 600;">Arama sonucu bulunamadı.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const recipeId = this.dataset.id;
+            const icon = this.querySelector('.fav-icon');
+
+            fetch(`/tarif/${recipeId}/favori/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(data => {
+                if (data.is_favorited) {
+                    icon.classList.replace('fa-regular', 'fa-solid');
+                    icon.style.color = '#e53e3e';
+                } else {
+                    icon.classList.replace('fa-solid', 'fa-regular');
+                    icon.style.color = '#718096';
+                }
+            })
+            .catch(() => console.error('Favori işlemi başarısız.'));
+        });
+    });
+});
+</script>
+{% endblock %}

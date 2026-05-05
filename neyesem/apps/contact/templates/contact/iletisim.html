@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}İletişim - Ne Yesem{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto;">
+    <h2 style="font-size: 32px; font-weight: 800; color: var(--text-main); margin-bottom: 10px;">İletişim</h2>
+    <p style="color: var(--text-muted); margin-bottom: 30px;">Bize mesaj göndermek için aşağıdaki formu doldur.</p>
+
+    <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: var(--shadow-md); margin-bottom: 40px;">
+        <form method="POST" style="display: flex; flex-direction: column; gap: 20px;">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted);">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p style="color: #ef4444; font-size: 12px; margin-top: 4px;">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div>
+                <button type="submit" class="btn"><i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i> Gönder</button>
+            </div>
+        </form>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #edf2f7; margin: 40px 0;">
+
+    <div style="text-align: center;">
+        <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 25px; color: var(--text-main);">İletişim Ekibi</h3>
+        <div style="display: flex; justify-content: center; gap: 60px; flex-wrap: wrap;">
+            <div>
+                <p><strong>Nihat Alıcı</strong></p>
+                <p>📞 <a href="tel:+905510367975" style="color:#ff6b35; text-decoration:none;">+90 551 036 79 75</a></p>
+                <p>✉️ <a href="mailto:nihataliciii@gmail.com" style="color:#ff6b35; text-decoration:none;">nihataliciii@gmail.com</a></p>
+            </div>
+            <div>
+                <p><strong>Ahmet Emin Kara</strong></p>
+                <p>📞 <a href="tel:+905462946079" style="color:#ff6b35; text-decoration:none;">+90 546 294 60 79</a></p>
+                <p>✉️ <a href="mailto:ahmeteminkara6@gmail.com" style="color:#ff6b35; text-decoration:none;">ahmeteminkara6@gmail.com</a></p>
+            </div>
+            <div>
+                <p><strong>Naz Özen</strong></p>
+                <p>📞 <a href="tel:+905468892005" style="color:#ff6b35; text-decoration:none;">+90 546 889 20 05</a></p>
+                <p>✉️ <a href="mailto:nazozen05@gmail.com" style="color:#ff6b35; text-decoration:none;">nazozen05@gmail.com</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
