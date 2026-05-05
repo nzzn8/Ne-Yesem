@@ -15,15 +15,24 @@ from .services import sync_recipe_ingredients
 
 def ingredient_autocomplete(request):
     q = request.GET.get('q', '').strip()
+    if not q:
+        # Fokus anında en çok kullanılan 8 malzemeyi döndür
+        results = list(
+            Ingredient.objects
+            .annotate(usage=db_models.Count('recipe_ingredients'))
+            .order_by('-usage', 'name')
+            .values_list('name', flat=True)[:8]
+        )
+        return JsonResponse({'results': results, 'popular': True})
     if len(q) < 2:
-        return JsonResponse({'results': []})
+        return JsonResponse({'results': [], 'popular': False})
     results = list(
         Ingredient.objects
         .filter(name__icontains=q)
         .order_by('name')
         .values_list('name', flat=True)[:12]
     )
-    return JsonResponse({'results': results})
+    return JsonResponse({'results': results, 'popular': False})
 
 
 class RecipeListView(ListView):
