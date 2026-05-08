@@ -121,6 +121,77 @@
                     {% endif %}
                 {% endfor %}
             </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div style="padding: 0 40px 40px 40px;">
+        <hr style="border: 0; border-top: 1px solid #edf2f7; margin-bottom: 30px;">
+        <h3 style="font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom: 25px; display: flex; align-items: center;">
+            <i class="fa-regular fa-comments" style="color: var(--primary); margin-right: 10px;"></i> Yorumlar ({{ comments.count|default:0 }})
+        </h3>
+
+        <!-- Comment Form -->
+        <div style="background: #fafafa; padding: 25px; border-radius: 12px; border: 1px solid #edf2f7; margin-bottom: 40px;">
+            {% if user.is_authenticated %}
+                <h4 style="font-size: 18px; font-weight: 700; color: #2d3748; margin-bottom: 15px;">Yorum Yap</h4>
+                <form method="POST" action="{% url 'recipes:detail' recipe.id %}">
+                    {% csrf_token %}
+                    <div style="margin-bottom: 15px;">
+                        {{ comment_form.text }}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center;">
+                            <label style="font-weight: 600; color: #4a5568; margin-right: 10px;">{{ comment_form.rating.label }}:</label>
+                            {{ comment_form.rating }}
+                        </div>
+                        <button type="submit" class="btn" style="background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.3s ease;">
+                            Gönder
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div style="text-align: center; padding: 20px 0;">
+                    <i class="fa-solid fa-lock" style="font-size: 24px; color: #a0aec0; margin-bottom: 10px; display: block;"></i>
+                    <p style="color: #4a5568; margin-bottom: 15px; font-size: 16px;">Yorum yapmak için giriş yapmalısınız.</p>
+                    <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn" style="display: inline-block; background: var(--primary); color: white; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-weight: 600;">Giriş Yap</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Comments List -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for comment in comments %}
+                <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #edf2f7; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #edf2f7; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: #a0aec0; font-size: 18px; font-weight: bold; text-transform: uppercase;">
+                                {{ comment.user.username|make_list|first }}
+                            </div>
+                            <div>
+                                <h5 style="margin: 0; font-size: 16px; font-weight: 700; color: #2d3748;">{{ comment.user.username }}</h5>
+                                <span style="font-size: 12px; color: #a0aec0;">{{ comment.created_at|date:"d M Y H:i" }}</span>
+                            </div>
+                        </div>
+                        {% if comment.rating %}
+                        <div style="color: #ecc94b; font-size: 14px;">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= comment.rating %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% else %}
+                                    <i class="fa-regular fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <p style="color: #4a5568; line-height: 1.6; margin: 0; font-size: 15px;">{{ comment.text|linebreaksbr }}</p>
+                </div>
+            {% empty %}
+                <div style="text-align: center; padding: 30px; background: #fafafa; border-radius: 12px; border: 1px dashed #cbd5e0;">
+                    <i class="fa-regular fa-comment-dots" style="font-size: 32px; color: #cbd5e0; margin-bottom: 15px;"></i>
+                    <p style="color: #718096; margin: 0;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+                </div>
+            {% endfor %}
         </div>
     </div>
 </div>

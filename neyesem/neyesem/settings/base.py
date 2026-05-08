@@ -14,7 +14,6 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.recipes',
     'apps.contact',
-    'apps.tarifler',
 ]
 
 MIDDLEWARE = [

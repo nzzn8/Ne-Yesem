@@ -8,8 +8,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 
-from .models import Recipe, Ingredient
-from .forms import RecipeForm
+from .models import Recipe, Ingredient, RecipeComment
+from .forms import RecipeForm, RecipeCommentForm
 from .services import sync_recipe_ingredients
 from apps.users.models import Profile
 
@@ -92,7 +92,28 @@ class RecipeDetailView(DetailView):
             profile, _ = Profile.objects.get_or_create(user=self.request.user)
             is_favorited = self.object in profile.favorites.all()
         context['is_favorited'] = is_favorited
+        context['comment_form'] = RecipeCommentForm()
+        context['comments'] = self.object.comments.all()
         return context
+
+    def post(self, request, *args, **kwargs):
+        from django.shortcuts import redirect
+        if not request.user.is_authenticated:
+            return redirect('%s?next=%s' % (reverse('users:login'), request.path))
+            
+        self.object = self.get_object()
+        form = RecipeCommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.recipe = self.object
+            comment.user = request.user
+            comment.save()
+            messages.success(request, 'Yorumunuz eklendi!')
+            return redirect('recipes:detail', pk=self.object.pk)
+            
+        context = self.get_context_data(object=self.object)
+        context['comment_form'] = form
+        return self.render_to_response(context)
 
 
 class RecipeCreateView(LoginRequiredMixin, CreateView):

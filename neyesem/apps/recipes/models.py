@@ -90,3 +90,18 @@ class RecipeIngredient(models.Model):
         if self.quantity_text:
             return f"{self.quantity_text} {self.ingredient.name}"
         return self.ingredient.name
+
+class RecipeComment(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='comments', verbose_name="Tarif")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipe_comments', verbose_name="Kullanıcı")
+    text = models.TextField(verbose_name="Yorum")
+    rating = models.IntegerField(verbose_name="Puan", blank=True, null=True, help_text="1 ile 5 arası puan")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Tarih")
+
+    class Meta:
+        verbose_name = "Tarif Yorumu"
+        verbose_name_plural = "Tarif Yorumları"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.recipe.title} Yorumu"

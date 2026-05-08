@@ -1,5 +1,5 @@
 from django import forms
-from .models import Recipe
+from .models import Recipe, RecipeComment
 
 
 class RecipeForm(forms.ModelForm):
@@ -31,4 +31,17 @@ class RecipeForm(forms.ModelForm):
                 'rows': 6,
             }),
             'image_url': forms.URLInput(attrs={'placeholder': 'https://...'}),
+        }
+
+class RecipeCommentForm(forms.ModelForm):
+    class Meta:
+        model = RecipeComment
+        fields = ['text', 'rating']
+        labels = {
+            'text': '',
+            'rating': 'Puan (1-5)'
+        }
+        widgets = {
+            'text': forms.Textarea(attrs={'placeholder': 'Bu tarif hakkında ne düşünüyorsunuz?', 'rows': 3, 'class': 'form-control', 'style': 'width: 100%; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0; margin-bottom: 15px;'}),
+            'rating': forms.NumberInput(attrs={'min': 1, 'max': 5, 'class': 'form-control', 'style': 'width: 100px; display: inline-block; border-radius: 8px; border: 1px solid #e2e8f0; padding: 8px; margin-left: 10px;'})
         }
