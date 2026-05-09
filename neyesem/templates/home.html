@@ -13,8 +13,8 @@
     
     <div style="display:flex; justify-content:center; gap: 20px; flex-wrap: wrap;">
         {% if not user.is_authenticated %}
-        <a href="/login"><button class="btn" style="padding: 16px 36px; font-size: 16px;">Hemen Başla</button></a>
-        <a href="/register"><button class="btn" style="padding: 16px 36px; font-size: 16px; background: transparent; color: white; border: 2px solid white; box-shadow: none;">Ücretsiz Kayıt Ol</button></a>
+        <a href="/tarifler/"><button class="btn" style="padding: 16px 36px; font-size: 16px;">Hemen Başla</button></a>
+        <a href="/kayit/"><button class="btn" style="padding: 16px 36px; font-size: 16px; background: transparent; color: white; border: 2px solid white; box-shadow: none;">Ücretsiz Kayıt Ol</button></a>
         {% else %}
         <a href="/tarifler"><button class="btn" style="padding: 16px 36px; font-size: 16px;"><i class="fa-solid fa-magnifying-glass" style="margin-right:8px;"></i> Tarifleri Keşfet</button></a>
         {% endif %}
