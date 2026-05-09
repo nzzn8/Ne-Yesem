@@ -70,3 +70,4 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'users:account_profile'
+LOGOUT_REDIRECT_URL = '/'
